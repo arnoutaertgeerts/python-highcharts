@@ -9,7 +9,7 @@ pip install charts
 ## Quick start
 We are going to create a highstock plot, show it inline in an IPython notebook and save the html file for later viewing/sharing of the plot. Import the libary to begin plotting:
 
-```python
+``` python
 import charts
 ```
 
@@ -19,7 +19,7 @@ The `plot()` function of the module needs the following necessary parameters:
 
 Quickly generate some test data provided by the library for exploring in the right format and set the options object equal to some defaults:
 
-```python
+``` python
 series = [
     charts.data.aapl(),
     charts.data.msft(),
@@ -32,7 +32,7 @@ Now plot the chart with the following extra options:
 - `stock=True`: use HighStock instead of HighChart.
 - `inline=True` Display the plot inline in an IPython notebook (Set this to false when not using the notebook)
 - `save=mychart.hmtl`: Save the generated chart to mychart.html.
+``` python
+charts.plot(series, options, height=500, stock=True, inline=True, save='chart.html')
 ```
-charts.plot(series, options, height=500, stock=True, inline=True, save='mychart.html')
-```
-Add variables to the plot by typing in there name (try 'AAPL').
+Add variables to the plot by typing in there name. Try typing in 'AAPL' or 'OHLC' in this [notebook](http://nbviewer.ipython.org/github/arnoutaertgeerts/python-highcharts/blob/master/Quickstart.ipynb).
