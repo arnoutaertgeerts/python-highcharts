@@ -1,51 +1,34 @@
-# ipython-highcharts
-Use the excellent [highcharts/highcstock](http://www.highcharts.com/stock/demo) library in an IPython notebook as an interactive alternative to maplotlib.
+# Python-highcharts
+Use the excellent [highcharts/highcstock](http://www.highcharts.com/stock/demo) library in Python or even in an IPython notebook as an interactive alternative to maplotlib.
 
 ## Install
-For know you should clone the libary and it to your PYTHONPATH:
-
 ```shell
-git clone https://github.com/arnoutaertgeerts/ipython-highcharts ipython-highcharts
-export PYTHONPATH=/Path/to/the/module:$PYTHONPATH
+pip install charts
 ```
 
 ## Quick start
-Import the libary and the `json` module to convert your data into the json format.
+We are going to create a highstock plot, show it inline in an IPython notebook and save the html file for later viewing/sharing of the plot. Import the libary to begin plotting:
 
 ```python
-import highstock as hs
-import json
+import charts
 ```
-Call the `plot(series, options)` function of the module and pass in the following necessary parameters:
-- `series` ([highchart api](http://api.highcharts.com/highstock#series<line>))
-- `options` ([highchart api](http://api.highcharts.com/highstock#lang))
 
-Both objects should be json objects and conform to the highchart API as given in the links above. 
+The `plot()` function of the module needs the following necessary parameters:
+- `series`: A dictionary containing the `name` and `data` fields
+- `options` A dictionary containing the options for the chart. The possible options are equal to the options of the highchart libary which can be found [here](http://api.highcharts.com/highcharts). 
+- 
 
-The module provides some mock data which can be used for exploring the libary. First load the data create a series object.
+Quickly generate some test data provided by the library for exploring in the right format and set the options object equal to some defaults:
+
 ```python
-data = hs.mock_data()
-series = json.dumps([dict(data=data, name='First')])
+series = [
+    charts.data.aapl(),
+    charts.data.msft(),
+    charts.data.ohlc()
+]
+options = charts.options.default()
 ```
-This will create a series object with one line named First. Second create an options object:
-```python
-options = {
-    'chart': {
-        'zoomType': 'y'
-    },
-    
-    'tooltip': {
-        'decimalValues': 2
-    },
-    'title': {
-        'text':'Some test data'
-    },
-    'legend': {
-        'enabled': 'true'
-    }
-}
-```
-This can either be directly JSON conform as shown above or a `json.dumps()` of a Python dictionary object. Now plot the chart:
+Now plot the chart:
 ```
 hs.plot(series, options)
 ```
