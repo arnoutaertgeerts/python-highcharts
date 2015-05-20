@@ -1,5 +1,5 @@
 # Python-highcharts
-Use the excellent [highcharts/highcstock](http://www.highcharts.com/stock/demo) library in Python or even in an IPython notebook as an interactive alternative to maplotlib.
+Use the excellent [highcharts/highstock](http://www.highcharts.com/stock/demo) library in Python or even in an IPython notebook as an interactive alternative to maplotlib.
 
 ## Install
 ```shell
