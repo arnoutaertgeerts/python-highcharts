@@ -35,3 +35,4 @@ Now plot the chart with the following extra options:
 ```
 charts.plot(series, options, height=500, stock=True, inline=True, save='mychart.html')
 ```
+Add variables to the plot by typing in there name (try 'AAPL').
