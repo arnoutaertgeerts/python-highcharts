@@ -1,4 +1,6 @@
 __author__ = 'arnout'
 
-from charts import plot, plotasync
-import data as data
+from plot import plot, plotasync
+
+import options
+import data

@@ -116,3 +116,6 @@ docs/_build/
 
 # PyBuilder
 target/
+
+large
+.pypirc
