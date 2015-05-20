@@ -92,6 +92,9 @@
             //TODO: Bring outside of this module
             var series = #series;
             var options = #options;
+            var useHighStock = #highstock;
+
+            var ChartType = useHighStock ? Highcharts.StockChart: Highcharts.Chart;
 
             var keys = [];
             angular.forEach(series, function(serie) {
@@ -117,7 +120,7 @@
             );
 
             $scope.options = angular.extend(options, {chart: chartOptions}, {series: []});
-            var chart = new Highcharts.StockChart($scope.options);
+            var chart = new ChartType($scope.options);
 
             function showOptions($event) {
                 $mdDialog.show({
