@@ -1,0 +1,245 @@
+<!-- External plugins -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.17/require.min.js"></script>
+
+<script type="text/javascript">
+    requirejs.config({
+        paths: {
+            'highstock': "http://code.highcharts.com/stock/highstock",
+            'standalone': "http://code.highcharts.com/adapters/standalone-framework",
+            'export': "http://code.highcharts.com/stock/modules/exporting",
+
+            'angular': "https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.15/angular.min",
+            'underscore': "https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min",
+            'animate': "https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.15/angular-animate.min",
+            'aria': "https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.15/angular-aria.min",
+            'material': "https://cdnjs.cloudflare.com/ajax/libs/angular-material/0.9.4/angular-material.min"
+        },
+
+        shim: {
+            'highstock': {
+                deps: ['standalone'],
+                exports: 'Highcharts'
+            },
+            'export': {
+                deps: ['highstock']
+            },
+            'angular': {
+                exports: 'angular'
+            },
+            'underscore': {
+                exports: '_'
+            },
+            'animate': ['angular'],
+            'aria': ['angular'],
+            'material': ['angular', 'animate', 'aria']
+        }
+    });
+</script>
+
+<!-- Stylesheets -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/angular-material/0.9.4/angular-material.min.css"/>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+
+<style>
+    .md-chips .md-chip-input-container input:focus {
+        outline: none;
+        border: none;
+        box-shadow: none;
+    }
+    md-input-container .md-input:focus {
+        box-shadow: none;
+    }
+</style>
+
+<script type="text/javascript">
+    //inject:js
+    require([
+        'highstock',
+        'angular',
+        'underscore',
+        'animate',
+        'aria',
+        'material',
+        'export'
+    ], function () {
+
+        //Count the number of apps / charts on the page
+        if (window.counter == undefined) {
+            window.counter = 0;
+        } else {
+            window.counter++;
+        }
+
+        //Create different containers for the apps and charts
+        var chartContainer = document.getElementById("container");
+        chartContainer.id = "chart" + window.counter.toString();
+
+        var appContainer = document.getElementById("appid");
+        appContainer.id = "app" + window.counter.toString();
+
+
+        /*
+         * Angular app
+         * */
+        var app = angular.module('myApp', [
+            "ngMaterial"
+        ]);
+
+        app.controller('MyController', [
+            '$scope',
+            '$mdDialog',
+            '$http',
+
+            function ($scope, $mdDialog, $http) {
+
+            var options = #options;
+            var useHighStock = #highstock;
+            var path = #path;
+
+            var ChartType = useHighStock ? Highcharts.StockChart: Highcharts.Chart;
+
+            $http.get(path + '/keys.json').success(function(data) {
+              $scope.keys = data;
+
+              $scope.readonly = false;
+              $scope.selectedItem = null;
+              $scope.searchText = null;
+              $scope.querySearch = querySearch;
+              $scope.selected = {};
+              $scope.selected.keys = [];
+
+              $scope.options = null;
+              $scope.showOptions = showOptions;
+
+
+              var chartOptions = angular.extend(
+                      options["chart"],
+                      {renderTo: chartContainer.id}
+              );
+
+              $scope.options = angular.extend(options, {chart: chartOptions}, {series: []});
+              var chart = new ChartType($scope.options);
+
+              function showOptions($event) {
+                  $mdDialog.show({
+                      controller: DialogController,
+                      template: '<md-dialog aria-label="Mango (Fruit)">\n    <md-dialog-content class="sticky-container">\n        <md-toolbar>\n            <div class="md-toolbar-tools">\n                <span>Settings</span>\n                <!-- fill up the space between left and right area -->\n                <span flex></span>\n            </div>\n        </md-toolbar>\n        <div layout-padding>\n\n            <md-input-container>\n                <label>Title</label>\n                <input type="text" ng-model="options.title.text">\n            </md-input-container>\n            \n        </div>\n    </md-dialog-content>\n    <div class="md-actions" layout="row">\n        <md-button ng-click="submit(options)" class="md-primary">\n            Submit\n        </md-button>\n        <md-button ng-click="cancel()" class="md-primary">\n            Cancel\n        </md-button>\n    </div>\n</md-dialog>',
+                      targetEvent: $event,
+                      hasBackdrop: false,
+                      scope: $scope
+                  })
+                  .then(function(options) {
+                      chart.destroy();
+                      chart = new Highcharts.StockChart($scope.options);
+                  }, function() {
+
+                  });
+              }
+
+              function DialogController($scope, $mdDialog) {
+                  $scope.hide = function () {
+                      $mdDialog.hide();
+                  };
+                  $scope.cancel = function () {
+                      $mdDialog.cancel();
+                  };
+                  $scope.submit = function (options) {
+                      $mdDialog.hide(options);
+                  };
+
+              }
+
+              function querySearch (query) {
+                  var availableKeys = _.difference($scope.keys, $scope.selected.keys);
+                  return query ? availableKeys.filter(createFilterFor(query)) : [];
+              }
+
+              function createFilterFor(query) {
+                  var lowercaseQuery = angular.lowercase(query);
+                  return function filterFn(key) {
+                      return (angular.lowercase(key).indexOf(lowercaseQuery) > -1);
+                  };
+              }
+
+              // Update the series
+              $scope.$watch('selected.keys', function(newValue, oldValue) {
+                  var index = {};
+
+                  if (newValue.length > oldValue.length) {
+                      var newKey = _.difference(newValue, oldValue)[0];
+
+                      $http.get(path + '/' + newKey + '.json').success(function(data) {
+                          chart.addSeries(data);
+                      });
+
+
+                  } else if (newValue.length < oldValue.length) {
+                      var removedKey = _.difference(oldValue, newValue)[0];
+                      index = findSeries(chart.series, removedKey);
+
+                      chart.series[index].remove();
+                  }
+              }, true);
+
+              function findSeries(series, key) {
+                  var index = {};
+
+                  var arrayLength = series.length;
+                  for (var i = 0; i < arrayLength; i++) {
+                      if (series[i].name == key) {
+                          index = i
+                      }
+                  }
+                  return index
+              }
+            }).error(function(error) {
+              console.log(error);
+            })
+
+        }]);
+
+        angular.bootstrap(appContainer, ['myApp']);
+    });
+</script>
+
+
+<div id="appid">
+
+    <div ng-controller="MyController">
+
+
+
+        <section flex>
+            <md-content class="md-padding autocomplete" layout="row">
+                <div flex="100"><md-chips ng-model="selected.keys" md-autocomplete-snap md-require-match>
+                    <md-autocomplete
+                            md-selected-item="selectedItem"
+                            md-search-text="searchText"
+                            md-items="item in querySearch(searchText)"
+                            md-item-text="item"
+                            md-autoselect="true"
+                            md-min-length="1"
+                            placeholder="Add a variable">
+                        <span md-highlight-text="searchText">{{item}}</span>
+                    </md-autocomplete>
+                    <md-chip-template>
+                        <span>
+                          <strong>{{$chip}}</strong>
+                        </span>
+                    </md-chip-template>
+                </md-chips></div>
+
+                <!--<div flex="20" layout="row" layout-align="end center">
+                    <md-button class="md-primary" ng-click="showOptions($event)">
+                        Chart settings
+                    </md-button>
+                </div>-->
+            </md-content>
+        </section>
+
+
+
+        <div id="container" style="height: #height; min-width: 310px"></div>
+    </div>
+</div>
