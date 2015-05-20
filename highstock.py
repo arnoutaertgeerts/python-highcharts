@@ -2,6 +2,7 @@ __author__ = 'arnout'
 from IPython.display import HTML
 from string import Template
 import os
+import json
 
 package_directory = os.path.dirname(os.path.abspath(__file__))
 
@@ -11,18 +12,19 @@ class MyTemplate(Template):
     idpattern = r'[a-z][_a-z0-9]*'
 
 
-def plot(series, options, height=400, save=False):
+def plot(series, options, height=400, save=False, stock=True):
 
     with open(os.path.join(package_directory, "index.html"), "r") as html:
         string = MyTemplate(html.read()).substitute(
             path=package_directory,
             series=series,
             options=options,
+            highstock=json.dumps(stock),
             height=str(height) + "px"
         )
 
     if save:
-        with open("test.html", "w") as text_file:
+        with open(save, "w") as text_file:
             text_file.write(string)
 
     return HTML(string)
