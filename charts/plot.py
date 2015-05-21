@@ -10,7 +10,7 @@ package_directory = os.path.dirname(os.path.abspath(__file__))
 
 
 class MyTemplate(Template):
-    delimiter = '#'
+    delimiter = '$$'
     idpattern = r'[a-z][_a-z0-9]*'
 
 

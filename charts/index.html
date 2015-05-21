@@ -50,6 +50,7 @@
         border: none;
         box-shadow: none;
     }
+
     md-input-container .md-input:focus {
         box-shadow: none;
     }
@@ -82,10 +83,7 @@
         var appContainer = document.getElementById("appid");
         appContainer.id = "app" + window.counter.toString();
 
-
-        /*
-         * Angular app
-         * */
+        //The angular app
         var app = angular.module('myApp', [
             "ngMaterial",
             "vAccordion"
@@ -93,29 +91,30 @@
 
         app.controller('MyController', ['$scope', function ($scope) {
 
-            //TODO: Bring outside of this module
-            var series = #series;
-            var options = #options;
-            var useHighStock = #highstock;
+            var series = $$series;
+            var options =$$options;
+            var useHighStock = $$highstock;
 
-            var ChartType = useHighStock ? Highcharts.StockChart: Highcharts.Chart;
+            //Choose a chart type
+            var ChartType = useHighStock ? Highcharts.StockChart : Highcharts.Chart;
 
             var keys = [];
-            angular.forEach(series, function(serie) {
+            angular.forEach(series, function (serie) {
                 keys.push(serie.name)
             });
 
             $scope.keys = keys;
-            $scope.readonly = false;
             $scope.selectedItem = null;
             $scope.searchText = null;
             $scope.querySearch = querySearch;
             $scope.keys = keys;
-            $scope.selected = {};                                                                                                                                                                   
+            $scope.selected = {};
             $scope.selected.keys = [];
 
             $scope.options = null;
-            $scope.showOptions = showOptions
+            $scope.setOptions = setOptions;
+
+            $scope.$watch('selected.keys', updateSeries, true);
 
 
             var chartOptions = angular.extend(
@@ -123,15 +122,23 @@
                     {renderTo: chartContainer.id}
             );
 
-            $scope.options = angular.extend(options, {chart: chartOptions}, {series: []});
-            var chart = new ChartType($scope.options);
+            var renderedSeries = [];
 
+            options = angular.extend(options, {chart: chartOptions}, {series: renderedSeries});
+            var chart = new ChartType(options);
 
-            function showOptions() {
+            //Default highchart colors
+            var colors = {};
+            colors.available = ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9',
+                '#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1'];
+            colors.used = [];
+            console.log(colors);
 
+            function setOptions(options) {
+                newChart(angular.extend(chart.options, options), renderedSeries)
             }
 
-            function querySearch (query) {
+            function querySearch(query) {
                 var availableKeys = _.difference($scope.keys, $scope.selected.keys);
                 return query ? availableKeys.filter(createFilterFor(query)) : [];
             }
@@ -144,22 +151,19 @@
             }
 
             // Update the series
-            $scope.$watch('selected.keys', function(newValue, oldValue) {
-                var index = {};
+            function updateSeries(newValue, oldValue) {
 
                 if (newValue.length > oldValue.length) {
                     var newKey = _.difference(newValue, oldValue)[0];
-                    index = findSeries(series, newKey);
-
-                    chart.addSeries(series[index])
+                    addSeries(newKey);
+                    newChart(chart.options, renderedSeries);
 
                 } else if (newValue.length < oldValue.length) {
                     var removedKey = _.difference(oldValue, newValue)[0];
-                    index = findSeries(chart.series, removedKey);
-
-                    chart.series[index].remove();
+                    deleteSeries(removedKey);
+                    newChart(chart.options, renderedSeries)
                 }
-            }, true);
+            }
 
             function findSeries(series, key) {
                 var index = {};
@@ -173,12 +177,33 @@
                 return index
             }
 
+            function newChart(options, series) {
+                var plotOptions =  {
+                    series: {
+                        animation: false
+                    }
+                };
+
+                chart = new ChartType(angular.extend(options, {plotOptions: plotOptions}, {series:series}));
+            }
+
+            function addSeries(name) {
+                var index = findSeries(series, name);
+                var newSeries = series[index];
+                renderedSeries.push(angular.extend(newSeries, {color: colors.available[0]}));
+                colors.used.push(colors.available.splice(0, 1));
+                console.log(colors)
+            }
+
+            function deleteSeries(name) {
+                var index = findSeries(renderedSeries, name);
+                var deletedColor = renderedSeries.splice(index, 1).color;
+                var colorIndex = colors.used.indexOf(deletedColor);
+                colors.available.push(colors.used.splice(colorIndex, 1));
+                console.log(colors)
+            }
+
         }]);
-
-        app.controller("OptionsController", function($scope, close) {
-            $scope.close = close;
-
-        });
 
         angular.bootstrap(appContainer, ['myApp']);
     });
@@ -219,7 +244,9 @@
                         <v-pane>
                             <v-pane-header style="display:none"></v-pane-header>
                             <v-pane-content>
-                                >
+                                The settings pane
+
+                                <md-button class="md-raised md-primary" ng-click="setOptions({title: {text: 'A new title'}})">Apply</md-button>
                             </v-pane-content>
                         </v-pane>
 
@@ -232,8 +259,6 @@
         </section>
 
 
-
-        
     </div>
 
     <script type="text/ng-template" id="modal.html">
