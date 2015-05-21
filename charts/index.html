@@ -211,16 +211,14 @@
 
             $scope.$watch('selected.keys', updateSeries, true);
 
-            var chartOptions = angular.extend(
-                    options["chart"],
-                    {renderTo: chartContainer.id}
-            );
+            var chartOptions = angular.extend(options["chart"], {renderTo: chartContainer.id});
 
             //Initial rendered series
             var renderedSeries =  [];
             options = angular.extend(options, {chart: chartOptions}, {series: renderedSeries});
             var chart = new ChartType(options);
 
+            //JSONEditor object
             $scope.obj = {data: chart.options, options: { mode: 'tree' }};
 
             //Default highchart colors
@@ -228,7 +226,6 @@
             colors.available = ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9',
                 '#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1'];
             colors.used = [];
-            console.log(colors);
 
             //Show first series
             $scope.selected.keys = _.filter(series, function(obj) {
@@ -260,7 +257,9 @@
                 if (newValue.length > oldValue.length) {
                     var newKeys = _.difference(newValue, oldValue);
                     angular.forEach(newKeys, function(newKey) {
-                        addSeries(newKey);
+                        var index = findSeries(series, newKey);
+                        var newSeries = series[index];
+                        addSeries(newSeries);
                     });
                     newChart(chart.options, renderedSeries);
 
@@ -293,9 +292,7 @@
                 chart = new ChartType(angular.extend(options, {plotOptions: plotOptions}, {series:series}));
             }
 
-            function addSeries(name) {
-                var index = findSeries(series, name);
-                var newSeries = series[index];
+            function addSeries(newSeries) {
                 renderedSeries.push(angular.extend(newSeries, {color: colors.available[0]}));
                 colors.used.push(colors.available.splice(0, 1)[0]);
             }
@@ -361,11 +358,5 @@
                 </md-content>
             </div>
         </section>
-
-
     </div>
-
-    <script type="text/ng-template" id="modal.html">
-        <p ng-click="close()">close</p>
-    </script>
 </div>
