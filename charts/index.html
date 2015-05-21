@@ -211,14 +211,13 @@
 
             $scope.$watch('selected.keys', updateSeries, true);
 
-
             var chartOptions = angular.extend(
                     options["chart"],
                     {renderTo: chartContainer.id}
             );
 
-            var renderedSeries = [];
-
+            //Initial rendered series
+            var renderedSeries =  [];
             options = angular.extend(options, {chart: chartOptions}, {series: renderedSeries});
             var chart = new ChartType(options);
 
@@ -230,6 +229,13 @@
                 '#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1'];
             colors.used = [];
             console.log(colors);
+
+            //Show first series
+            $scope.selected.keys = _.filter(series, function(obj) {
+                return obj.display == true || obj.display === true
+            }).map(function(serie) {return serie.name});
+
+            updateSeries($scope.selected.keys, []);
 
             function setOptions(options) {
                 newChart(angular.extend(chart.options, options), renderedSeries);
@@ -252,8 +258,10 @@
             function updateSeries(newValue, oldValue) {
 
                 if (newValue.length > oldValue.length) {
-                    var newKey = _.difference(newValue, oldValue)[0];
-                    addSeries(newKey);
+                    var newKeys = _.difference(newValue, oldValue);
+                    angular.forEach(newKeys, function(newKey) {
+                        addSeries(newKey);
+                    });
                     newChart(chart.options, renderedSeries);
 
                 } else if (newValue.length < oldValue.length) {

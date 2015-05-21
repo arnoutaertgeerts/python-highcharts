@@ -25,6 +25,12 @@ def plot(series, options, height=400, save=False, stock=True, inline=True):
     :param inline: Set to False to not show the chart inline
     :return:
     """
+
+    # Set the display property default to true for a synchronous plot
+    for serie in series:
+        if 'display' not in serie:
+            serie['display'] = True
+
     with open(os.path.join(package_directory, "index.html"), "r") as html:
         string = MyTemplate(html.read()).substitute(
             path=package_directory,
@@ -47,6 +53,12 @@ def plot(series, options, height=400, save=False, stock=True, inline=True):
 
 
 def plotasync(series, options, height=400, name="chart", stock=True, inline=True):
+
+    # Set the display property default to false for an asynchronous plot
+    for serie in series:
+        if 'display' not in serie:
+            serie['display'] = False
+
     keys = []
 
     if os.path.exists(name):
