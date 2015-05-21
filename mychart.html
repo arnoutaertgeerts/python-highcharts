@@ -211,7 +211,13 @@
 
             $scope.$watch('selected.keys', updateSeries, true);
 
-            var chartOptions = angular.extend(options["chart"], {renderTo: chartContainer.id});
+            if (typeof options.chart === "undefined"){
+                var chartOptions = {renderTo: chartContainer.id};
+            } else {
+                var chartOptions = angular.extend(options["chart"], {renderTo: chartContainer.id});
+            }
+
+
 
             //Initial rendered series
             var renderedSeries =  [];

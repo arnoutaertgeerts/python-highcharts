@@ -14,7 +14,7 @@ class MyTemplate(Template):
     idpattern = r'[a-z][_a-z0-9]*'
 
 
-def plot(series, options, height=400, save=False, stock=True, inline=True):
+def plot(series, options, height=400, save=False, stock=False, inline=True):
     """
     Make a highchart plot with all data embedded in the HTML
     :param series: The necessary data

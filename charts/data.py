@@ -5590,3 +5590,41 @@ def ohlc():
         [1368057600000, 871.48],
         [1368144000000, 880.23]
     ])
+
+
+def area():
+    return [{
+        'name': 'John',
+        'data': [5, 3, 4, 7, 2]
+    }, {
+        'name': 'Jane',
+        'data': [2, -2, -3, 2, 1]
+    }, {
+        'name': 'Joe',
+        'data': [3, 4, 4, -2, 5]
+    }]
+
+
+def combination():
+    return [{
+        'type': 'column',
+        'name': 'Jane',
+        'data': [3, 2, 1, 3, 4]
+    }, {
+        'type': 'column',
+        'name': 'John',
+        'data': [2, 3, 5, 7, 6]
+    }, {
+        'type': 'column',
+        'name': 'Joe',
+        'data': [4, 3, 3, 9, 0]
+    }, {
+        'type': 'spline',
+        'name': 'Average',
+        'data': [3, 2.67, 3, 6.33, 3.33],
+        'marker': {
+            'lineWidth': 2,
+            'lineColor': '#90ed7d',
+            'fillColor': 'white'
+        }
+    }]

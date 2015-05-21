@@ -52,3 +52,9 @@ def default():
     }
     return options
 
+
+def area():
+    return {
+        'chart': {'type': 'area'},
+        'title': {'text': 'Area chart'}
+    }
