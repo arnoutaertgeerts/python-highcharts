@@ -191,7 +191,7 @@
                 var index = findSeries(series, name);
                 var newSeries = series[index];
                 renderedSeries.push(angular.extend(newSeries, {color: colors.available[0]}));
-                colors.used.push(colors.available.splice(0, 1));
+                colors.used.push(colors.available.splice(0, 1)[0]);
                 console.log(colors)
             }
 
@@ -199,7 +199,7 @@
                 var index = findSeries(renderedSeries, name);
                 var deletedColor = renderedSeries.splice(index, 1).color;
                 var colorIndex = colors.used.indexOf(deletedColor);
-                colors.available.push(colors.used.splice(colorIndex, 1));
+                colors.available.push(colors.used.splice(colorIndex, 1)[0]);
                 console.log(colors)
             }
 
