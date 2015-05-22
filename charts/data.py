@@ -3,7 +3,7 @@ __author__ = 'arnout'
 import pandas as pd
 
 
-def df_to_series(df, plot_columns=[]):
+def df_to_series(df, display=[]):
     """Prepare data from dataframe for plotting with python-highcharts.
     all columns in df are entries in the returned series.
 
@@ -11,6 +11,9 @@ def df_to_series(df, plot_columns=[]):
     data:list of [index, value]-lists.
     name:name of variable.
     """
+    
+    plot_columns = display
+
     df.index = df.index.tz_localize(None)
     index = [int(x/1e6) for x in df.index.asi8]
     series = []
