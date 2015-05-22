@@ -1,5 +1,38 @@
 __author__ = 'arnout'
 
+import pandas as pd
+
+
+def df_to_series(df, plot_columns=[]):
+    """Prepare data from dataframe for plotting with python-highcharts.
+    all columns in df are entries in the returned series.
+
+    The returned series is in the format suitable for python-highcharts: list of dicts with:
+    data:list of [index, value]-lists.
+    name:name of variable.
+    """
+    df.index = df.index.tz_localize(None)
+    index = [int(x/1e6) for x in df.index.asi8]
+    series = []
+    display = dict(zip(df.columns,[False for x in df]))
+    try:
+        for col in plot_columns:
+            try:
+                display[col]
+                display[col]=True
+            except KeyError:
+                print 'Warning\n','-'*7,'\n',' '*4,'"{}"'.format(col), 'will not be displayed.\nVariable not found in DataFrame.\n'
+                print 'Try one the following columns:\n{}'.format(list(df.columns))
+    except TypeError:
+        display = dict(zip(df.columns,[plot_columns for x in df]))
+    for col in df:
+        data = []
+        ts = df[col].where((pd.notnull(df[col])), None)
+        for i, x in enumerate(index):
+            data.append([index[i], ts.iloc[i]])
+        my_dict = {'data':data,'name':col, 'display':display[col]}
+        series.append(my_dict)
+    return series
 
 def msft():
     return dict(name='MSFT', data=[
