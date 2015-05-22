@@ -294,8 +294,19 @@
                         animation: false
                     }
                 };
+
+                //Get zoom
+                var xExtremes = chart.xAxis[0].getExtremes();
+
+                //Re-plot the chart
                 chart.destroy();
                 chart = new ChartType(angular.extend(options, {plotOptions: plotOptions}, {series:series}));
+
+                //Reset the zoom
+                chart.xAxis[0].setExtremes(xExtremes.min, xExtremes.max, false, false);
+
+                //Re-draw chart
+                chart.redraw();
             }
 
             function addSeries(newSeries) {
