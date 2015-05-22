@@ -11,7 +11,7 @@ def df_to_series(df, display=[]):
     data:list of [index, value]-lists.
     name:name of variable.
     """
-    
+
     plot_columns = display
 
     df.index = df.index.tz_localize(None)
