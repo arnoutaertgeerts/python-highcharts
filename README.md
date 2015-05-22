@@ -29,7 +29,7 @@ series = [
 options = charts.options.default()
 ```
 
-And finally plot the chart! Use `inline=True` if you are in an IPython notebook and `inline=False` otherwise.
+And finally plot the chart! Use `show='inline'` if you are in an IPython notebook and `show='tab'` otherwise.
 ```python
 charts.plot(series, options, height=500, stock=True, inline=True)
 ```
