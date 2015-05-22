@@ -31,7 +31,7 @@ options = charts.options.default()
 
 And finally plot the chart! Use `show='inline'` if you are in an IPython notebook and `show='tab'` otherwise.
 ```python
-charts.plot(series, options, height=500, stock=True, inline=True)
+charts.plot(series, options, height=500, stock=True, show='inline')
 ```
 
 Don't be affraid to play with the chart, it's interactive :) Try typing in `OHLC` in the variable selector or viewing a different time period by squeezing the bottom scroll bar!
