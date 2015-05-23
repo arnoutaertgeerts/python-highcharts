@@ -1,20 +1,15 @@
 __author__ = 'Arnout Aertgeerts'
 __version__ = '0.0.1'
 
-from string import Template
+from core import MyTemplate, to_json_files, to_series, clean_dir, set_display, show_plot
 from jsonencoder import ChartsJSONEncoder
+from chart import Chart
 
 import os
-import json
-import shutil
 import webbrowser
+import json
 
 package_directory = os.path.dirname(os.path.abspath(__file__))
-
-
-class MyTemplate(Template):
-    delimiter = '$$'
-    idpattern = r'[a-z][_a-z0-9]*'
 
 
 def line(*args, **kwargs):
@@ -31,6 +26,10 @@ def spline(*args, **kwargs):
 
 def pie(*args, **kwargs):
     return plot(*args, type='pie', **kwargs)
+
+
+def stock(*args, **kwargs):
+    return plot(*args, stock=True, **kwargs)
 
 
 def plot(series, options=dict(), height=400, save=False, stock=False, show='tab', display='all', type='line'):
@@ -76,25 +75,10 @@ def plot(series, options=dict(), height=400, save=False, stock=False, show='tab'
             with open(save, "w") as text_file:
                 text_file.write(string)
 
-    if show == 'inline':
-        from IPython.display import HTML
-
-        return HTML(string)
-
-    elif show == 'tab':
-        print 'Opening new tab...'
-        webbrowser.open_new_tab('file://' + os.path.realpath(save))
-
-    elif show == 'window':
-        print 'Trying to open a window. If this fails we will open a tab...'
-        webbrowser.open_new('file://' + os.path.realpath(save))
-
-    else:
-        if save:
-            print 'Chart saved to %s', save
+    return show_plot(string, save, show)
 
 
-def plotasync(series, options=dict(), height=400, name="chart", stock=True, show='tab', display=[]):
+def plotasync(series, options=dict(), height=400, name="chart", stock=False, show='tab', display=[], purge=False):
     # Set the display property default to false for an asynchronous plot
     """
 
@@ -112,16 +96,14 @@ def plotasync(series, options=dict(), height=400, name="chart", stock=True, show
     """
 
     # Clean the directory
-    clean_dir(name)
+    if purge:
+        clean_dir(name)
 
     # Convert to a legitimate series object
     series = to_series(series)
 
-    # Set the display option
-    series = set_display(series, display)
-
     # Convert to json files
-    to_json_files(series, name)
+    to_json_files(series, name, display)
 
     with open(os.path.join(package_directory, "index-async.html"), "r") as index:
         read = index.read()
@@ -144,110 +126,4 @@ def plotasync(series, options=dict(), height=400, name="chart", stock=True, show
     with open(html_path, "w") as html_file:
         html_file.write(html)
 
-    if show == 'inline':
-        from IPython.display import HTML
-        return HTML(string)
-
-    elif show == 'tab':
-        webbrowser.open_new_tab(html_path)
-
-    elif show == 'window':
-        webbrowser.open_new(html_path)
-
-
-def clean_dir(path):
-    if os.path.exists(path):
-        shutil.rmtree(path)
-    os.makedirs(path)
-
-
-def to_json_files(series, path):
-    keys = []
-    for s in series:
-        n = s["name"]
-        keys.append(n)
-        with open(os.path.join(path, n + ".json"), "w") as json_file:
-            json_file.write(json.dumps(s, cls=ChartsJSONEncoder))
-
-    with open(os.path.join(path, 'keys.json'), "w") as keys_file:
-        keys_file.write(json.dumps(keys))
-
-
-def set_display(series, display):
-    if display == 'all':
-        for s in series:
-            s['display'] = True
-
-    elif isinstance(display, list):
-        for s in series:
-            if s['name'] in display:
-                s['display'] = True
-            else:
-                s['display'] = False
-
-    return series
-
-
-def df_to_series(df):
-    """Prepare data from dataframe for plotting with python-highcharts.
-    all columns in df are entries in the returned series.
-
-    The returned series is in the format suitable for python-highcharts: list of dicts with:
-    data:list of [index, value]-lists.
-    name:name of variable.
-    """
-
-    import pandas as pd
-
-    df.index = df.index.tz_localize(None)
-    index = [int(x/1e6) for x in df.index.asi8]
-    series = []
-    for col in df:
-        data = []
-        ts = df[col].where((pd.notnull(df[col])), None)
-        for i, x in enumerate(index):
-            data.append([index[i], ts.iloc[i]])
-        my_dict = {'data': data,'name': col}
-        series.append(my_dict)
-    return series
-
-
-def list_to_series(array):
-    return dict(
-        data=array
-    )
-
-
-def to_series(series):
-    # Dictionary?
-    if isinstance(series, dict):
-        return [series]
-
-    # List of dictionaries?:
-    try:
-        if isinstance(series[0], dict):
-            return series
-    except KeyError:
-        pass
-
-    # List?
-    try:
-        if isinstance(series, list):
-            return [dict(data=series, name='variable')]
-    except KeyError:
-        pass
-
-    # Numpy array?
-    try:
-        import numpy as np
-        if isinstance(series, np.ndarray):
-            return [dict(data=series)]
-    except ImportError:
-        pass
-
-    # DataFrame?:
-    import pandas as pd
-    if isinstance(series, pd.DataFrame):
-        return df_to_series(series)
-
-    raise ValueError('Your data is not in the right format!')
+    return Chart(string, html_path, name, show)
