@@ -6,7 +6,6 @@ from jsonencoder import ChartsJSONEncoder
 from chart import Chart
 
 import os
-import webbrowser
 import json
 
 package_directory = os.path.dirname(os.path.abspath(__file__))
@@ -32,7 +31,7 @@ def stock(*args, **kwargs):
     return plot(*args, stock=True, **kwargs)
 
 
-def plot(series, options=dict(), height=400, save=False, stock=False, show='tab', display='all', type='line'):
+def plot(series, options=dict(), height=400, save=False, stock=False, show='tab', display=True, type='line'):
     """
     Make a highchart plot with all data embedded in the HTML
     :param series: The necessary data, can be a list of dictionaries or a dataframe
@@ -78,7 +77,7 @@ def plot(series, options=dict(), height=400, save=False, stock=False, show='tab'
     return show_plot(string, save, show)
 
 
-def plotasync(series, options=dict(), height=400, name="chart", stock=False, show='tab', display=[], purge=False):
+def plotasync(series, options=dict(), height=400, name="chart", stock=False, show='tab', display=False, purge=False):
     # Set the display property default to false for an asynchronous plot
     """
 

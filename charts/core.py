@@ -41,9 +41,6 @@ def to_json_files(series, path, display):
     except IOError:
         keys = []
 
-    with open(os.path.join(path, 'display.json'), "w") as display_file:
-        display_file.write(json.dumps(display))
-
     for s in series:
         n = s["name"]
         if n not in keys:
@@ -53,16 +50,28 @@ def to_json_files(series, path, display):
         else:
             print "Careful: '%s' was already present as key and is not added to the chart!" % n
 
+    with open(os.path.join(path, 'display.json'), "w") as display_file:
+        if display is True:
+            display_file.write(json.dumps(keys))
+        elif display is False:
+            display_file.write(json.dumps([]))
+        else:
+            display_file.write(json.dumps(display))
+
     with open(os.path.join(path, 'keys.json'), "w") as keys_file:
         keys_file.write(json.dumps(keys))
 
 
 def set_display(series, display):
-    if display == 'all':
+    if display is True:
         for s in series:
             s['display'] = True
 
-    elif isinstance(display, list):
+    elif display is False:
+        for s in series:
+            s['display'] = False
+
+    else:
         for s in series:
             if s['name'] in display:
                 s['display'] = True
