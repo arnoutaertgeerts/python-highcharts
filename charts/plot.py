@@ -17,7 +17,23 @@ class MyTemplate(Template):
     idpattern = r'[a-z][_a-z0-9]*'
 
 
-def plot(series, options=dict(), height=400, save=False, stock=False, show='tab', display='all'):
+def line(*args, **kwargs):
+    return plot(*args, type='line', **kwargs)
+
+
+def area(*args, **kwargs):
+    return plot(*args, type='area', **kwargs)
+
+
+def spline(*args, **kwargs):
+    return plot(*args, type='spline', **kwargs)
+
+
+def pie(*args, **kwargs):
+    return plot(*args, type='pie', **kwargs)
+
+
+def plot(series, options=dict(), height=400, save=False, stock=False, show='tab', display='all', type='line'):
     """
     Make a highchart plot with all data embedded in the HTML
     :param series: The necessary data, can be a list of dictionaries or a dataframe
@@ -33,6 +49,8 @@ def plot(series, options=dict(), height=400, save=False, stock=False, show='tab'
     :param display: A list containing the keys of the variables you want to show initially in the plot
     :return:
     """
+
+    options['chart'] = dict(type=type)
 
     # Convert to a legitimate series object
     series = to_series(series)
