@@ -1,6 +1,7 @@
 ## Other
 temp.*
 temp
+chart
 
 *.mat
 node_modules
