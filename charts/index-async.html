@@ -63,6 +63,32 @@
 </style>
 
 <script type="text/javascript">
+    Array.prototype.equals = function (array) {
+    // if the other array is a false value, return
+    if (!array)
+        return false;
+
+    // compare lengths - can save a lot of time
+    if (this.length != array.length)
+        return false;
+
+    for (var i = 0, l=this.length; i < l; i++) {
+        // Check if we have nested arrays
+        if (this[i] instanceof Array && array[i] instanceof Array) {
+            // recurse into the nested arrays
+            if (!this[i].equals(array[i]))
+                return false;
+        }
+        else if (this[i] != array[i]) {
+            // Warning - two different object instances will never be equal: {x:20} != {x:20}
+            return false;
+        }
+    }
+    return true;
+}
+</script>
+
+<script type="text/javascript">
     require(['json-editor', 'angular'], function (JSONEditor) {
         var module = angular.module('ng.jsoneditor', []);
         module.constant('ngJsoneditorConfig', {});
@@ -183,136 +209,170 @@
             "ng.jsoneditor"
         ]);
 
-        app.controller('MyController', ['$scope', '$http', function ($scope, $http) {
+        app.controller('MyController', [
+            '$scope',
+            '$http',
+            '$interval',
+            '$q', function ($scope, $http, $interval, $q) {
 
-            var options = $$options;
-            var useHighStock = $$highstock;
-            var path = $$path;
+                var options = $$options;
+                var useHighStock = $$highstock;
+                var path = $$path;
 
-            var ChartType = useHighStock ? Highcharts.StockChart: Highcharts.Chart;
+                var ChartType = useHighStock ? Highcharts.StockChart : Highcharts.Chart;
 
-            $http.get(path + '/keys.json').success(function(data) {
-                $scope.keys = data;
+                var displayed = [];
 
-                $scope.selectedItem = null;
-                $scope.searchText = null;
-                $scope.querySearch = querySearch;
-                $scope.selected = {};
-                $scope.selected.keys = [];
+                $http.get(path + '/keys.json').success(function (data) {
+                    $scope.keys = data;
 
-                $scope.options = null;
-                $scope.setOptions = setOptions;
+                    $scope.selectedItem = null;
+                    $scope.searchText = null;
+                    $scope.querySearch = querySearch;
+                    $scope.selected = {};
+                    $scope.selected.keys = [];
 
-                $scope.$watch('selected.keys', updateSeries, true);
+                    $scope.options = null;
+                    $scope.setOptions = setOptions;
 
-                if (typeof options.chart === "undefined"){
-                    var chartOptions = {renderTo: chartContainer.id};
-                } else {
-                    var chartOptions = angular.extend(options["chart"], {renderTo: chartContainer.id});
-                }
+                    $scope.$watch('selected.keys', updateSeries, true);
 
-                //Initial rendered series
-                var renderedSeries =  [];
-                options = angular.extend(options, {chart: chartOptions}, {series: renderedSeries});
-                var chart = new ChartType(options);
+                    $interval(update, 1000);
 
-                //JSONEditor object
-                $scope.obj = {data: chart.options, options: { mode: 'tree' }};
-
-                //Default highchart colors
-                var colors = {};
-                colors.available = ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9',
-                    '#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1'];
-                colors.used = [];
-
-                function setOptions(options) {
-                    newChart(angular.extend(chart.options, options), renderedSeries);
-                    $scope.accordion.toggle(0);
-                }
-
-                function querySearch (query) {
-                  var availableKeys = _.difference($scope.keys, $scope.selected.keys);
-                  return query ? availableKeys.filter(createFilterFor(query)) : [];
-                }
-
-                function createFilterFor(query) {
-                  var lowercaseQuery = angular.lowercase(query);
-                  return function filterFn(key) {
-                      return (angular.lowercase(key).indexOf(lowercaseQuery) > -1);
-                  };
-                }
-
-                //Update the series
-                function updateSeries(newValue, oldValue) {
-                    var index = {};
-
-                    if (newValue.length > oldValue.length) {
-                      //Fetch one key at a time in the asynchronous case
-                      var newKey = _.difference(newValue, oldValue)[0];
-                      $http.get(path + '/' + newKey + '.json').success(function(data) {
-                          addSeries(data);
-                      }).then(function() {
-                          newChart(chart.options, renderedSeries);
-                      });
-
-
-                    } else if (newValue.length < oldValue.length) {
-                        var removedKey = _.difference(oldValue, newValue)[0];
-                        deleteSeries(removedKey);
-                        newChart(chart.options, renderedSeries)
+                    if (typeof options.chart === "undefined") {
+                        var chartOptions = {renderTo: chartContainer.id};
+                    } else {
+                        var chartOptions = angular.extend(options["chart"], {renderTo: chartContainer.id});
                     }
-                }
 
-                function findSeries(series, key) {
-                    var index = {};
+                    //Initial rendered series
+                    var renderedSeries = [];
+                    options = angular.extend(options, {chart: chartOptions}, {series: renderedSeries});
+                    var chart = new ChartType(options);
 
-                    var arrayLength = series.length;
-                    for (var i = 0; i < arrayLength; i++) {
-                      if (series[i].name == key) {
-                          index = i
-                      }
+                    //JSONEditor object
+                    $scope.obj = {data: chart.options, options: { mode: 'tree' }};
+
+                    //Default highchart colors
+                    var colors = {};
+                    colors.available = ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9',
+                        '#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1'];
+                    colors.used = [];
+
+                    //Show first series
+                    $http.get(path + '/display.json').success(function (keys) {
+                        displayed = angular.copy(keys);
+                        $scope.selected.keys = keys;
+                        console.log('displayed init', displayed)
+                    });
+
+                    function setOptions(options) {
+                        newChart(angular.extend(chart.options, options), renderedSeries);
+                        $scope.accordion.toggle(0);
                     }
-                    return index
-                }
 
-                function newChart(options, series) {
-                    var plotOptions =  {
-                        series: {
-                            animation: false
+                    function querySearch(query) {
+                        var availableKeys = _.difference($scope.keys, $scope.selected.keys);
+                        return query ? availableKeys.filter(createFilterFor(query)) : [];
+                    }
+
+                    function createFilterFor(query) {
+                        var lowercaseQuery = angular.lowercase(query);
+                        return function filterFn(key) {
+                            return (angular.lowercase(key).indexOf(lowercaseQuery) > -1);
+                        };
+                    }
+
+                    //Update the series
+                    function updateSeries(newValue, oldValue) {
+                        var index = {};
+
+                        if (newValue.length > oldValue.length) {
+                            //Fetch one key at a time in the asynchronous case
+                            var newKeys = _.difference(newValue, oldValue);
+                            var promises = [];
+                            angular.forEach(newKeys, function (newKey) {
+                                promises.push($http.get(path + '/' + newKey + '.json').success(function (data) {
+                                    addSeries(data);
+                                }))
+                            });
+
+                            $q.all(promises).then(function () {
+                                newChart(chart.options, renderedSeries);
+                            });
+
+
+                        } else if (newValue.length < oldValue.length) {
+                            var removedKey = _.difference(oldValue, newValue)[0];
+                            deleteSeries(removedKey);
+                            newChart(chart.options, renderedSeries)
                         }
-                    };
+                    }
 
-                    //Get zoom
-                    var xExtremes = chart.xAxis[0].getExtremes();
+                    //Check for new keys
+                    function update() {
+                        $http.get(path + '/keys.json').success(function (data) {
+                            $scope.keys = data;
+                            $http.get(path + '/display.json').success(function(data, status) {
+                                if (!displayed.equals(data)) {
+                                    var newKeys = _.difference(data, $scope.selected.keys);
+                                    $scope.selected.keys.push.apply($scope.selected.keys, newKeys);
+                                    displayed = data;
+                                }
+                            })
+                        })
+                    }
 
-                    //Re-plot the chart
-                    chart.destroy();
-                    chart = new ChartType(angular.extend(options, {plotOptions: plotOptions}, {series:series}));
+                    function findSeries(series, key) {
+                        var index = {};
 
-                    //Reset the zoom
-                    chart.xAxis[0].setExtremes(xExtremes.min, xExtremes.max, false, false);
+                        var arrayLength = series.length;
+                        for (var i = 0; i < arrayLength; i++) {
+                            if (series[i].name == key) {
+                                index = i
+                            }
+                        }
+                        return index
+                    }
 
-                    //Re-draw chart
-                    chart.redraw();
-                }
+                    function newChart(options, series) {
+                        var plotOptions = {
+                            series: {
+                                animation: false
+                            }
+                        };
 
-                function addSeries(newSeries) {
-                    renderedSeries.push(angular.extend(newSeries, {color: colors.available[0]}));
-                    colors.used.push(colors.available.splice(0, 1)[0]);
-                }
+                        //Get zoom
+                        var xExtremes = chart.xAxis[0].getExtremes();
 
-                function deleteSeries(name) {
-                    var index = findSeries(renderedSeries, name);
-                    var deletedColor = renderedSeries.splice(index, 1).color;
-                    var colorIndex = colors.used.indexOf(deletedColor);
-                    colors.available.push(colors.used.splice(colorIndex, 1)[0]);
-                }
+                        //Re-plot the chart
+                        chart.destroy();
+                        chart = new ChartType(angular.extend(options, {plotOptions: plotOptions}, {series: series}));
 
-            }).error(function(error) {
-              console.log(error);
-            })
+                        //Reset the zoom
+                        chart.xAxis[0].setExtremes(xExtremes.min, xExtremes.max, false, false);
 
-        }]);
+                        //Re-draw chart
+                        chart.redraw();
+                    }
+
+                    function addSeries(newSeries) {
+                        renderedSeries.push(angular.extend(newSeries, {color: colors.available[0]}));
+                        colors.used.push(colors.available.splice(0, 1)[0]);
+                    }
+
+                    function deleteSeries(name) {
+                        var index = findSeries(renderedSeries, name);
+                        var deletedColor = renderedSeries.splice(index, 1).color;
+                        var colorIndex = colors.used.indexOf(deletedColor);
+                        colors.available.push(colors.used.splice(colorIndex, 1)[0]);
+                    }
+
+                }).error(function (error) {
+                    console.log(error);
+                })
+
+            }]);
 
         angular.bootstrap(appContainer, ['myApp']);
     });
@@ -346,6 +406,7 @@
                     </div>
                     <div flex="20" layout-align="end center" layout="row">
                         <md-button ng-click="accordion.toggle(0)">Settings</md-button>
+                        <md-button ng-click="update()">Update</md-button>
                     </div>
                 </md-content>
                 <md-content class="md-padding" flex>
@@ -353,9 +414,12 @@
                         <v-pane>
                             <v-pane-header style="display:none"></v-pane-header>
                             <v-pane-content>
-                                <div ng-jsoneditor ng-model="obj.data" options="obj.options" style="width: 100%; height: 300px;"></div>
+                                <div ng-jsoneditor ng-model="obj.data" options="obj.options"
+                                     style="width: 100%; height: 300px;"></div>
 
-                                <md-button class="md-raised md-primary no-padding" style="margin-left: 0;" ng-click="setOptions(obj.data)">Apply</md-button>
+                                <md-button class="md-raised md-primary no-padding" style="margin-left: 0;"
+                                           ng-click="setOptions(obj.data)">Apply
+                                </md-button>
                             </v-pane-content>
                         </v-pane>
 
