@@ -2,6 +2,7 @@ __author__ = 'Arnout Aertgeerts'
 __version__ = '0.0.1'
 
 from string import Template
+from jsonencoder import ChartsJSONEncoder
 
 import os
 import json
@@ -42,7 +43,7 @@ def plot(series, options=dict(), height=400, save=False, stock=False, show='tab'
     with open(os.path.join(package_directory, "index.html"), "r") as html:
         string = MyTemplate(html.read()).substitute(
             path=package_directory,
-            series=json.dumps(series),
+            series=json.dumps(series, cls=ChartsJSONEncoder),
             options=json.dumps(options),
             highstock=json.dumps(stock),
             height=str(height) + "px"
@@ -148,7 +149,7 @@ def to_json_files(series, path):
         n = s["name"]
         keys.append(n)
         with open(os.path.join(path, n + ".json"), "w") as json_file:
-            json_file.write(json.dumps(s))
+            json_file.write(json.dumps(s, cls=ChartsJSONEncoder))
 
     with open(os.path.join(path, 'keys.json'), "w") as keys_file:
         keys_file.write(json.dumps(keys))
@@ -188,7 +189,7 @@ def df_to_series(df):
         ts = df[col].where((pd.notnull(df[col])), None)
         for i, x in enumerate(index):
             data.append([index[i], ts.iloc[i]])
-        my_dict = {'data':data,'name':col}
+        my_dict = {'data': data,'name': col}
         series.append(my_dict)
     return series
 
@@ -216,6 +217,14 @@ def to_series(series):
         if isinstance(series, list):
             return [dict(data=series, name='variable')]
     except KeyError:
+        pass
+
+    # Numpy array?
+    try:
+        import numpy as np
+        if isinstance(series, np.ndarray):
+            return [dict(data=series)]
+    except ImportError:
         pass
 
     # DataFrame?:
