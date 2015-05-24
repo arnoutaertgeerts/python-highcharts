@@ -237,7 +237,8 @@
 
                     $scope.$watch('selected.keys', updateSeries, true);
 
-                    $interval(update, 1000);
+                    //$interval(update, 1000);
+                    $scope.update = update;
 
                     if (typeof options.chart === "undefined") {
                         var chartOptions = {renderTo: chartContainer.id};

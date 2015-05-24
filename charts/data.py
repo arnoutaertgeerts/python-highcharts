@@ -1,5 +1,6 @@
 __author__ = 'arnout'
 
+
 def df_to_series(df, display=[]):
     """Prepare data from dataframe for plotting with python-highcharts.
     all columns in df are entries in the returned series.

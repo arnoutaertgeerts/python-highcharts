@@ -2,6 +2,7 @@ __author__ = 'arnoutaertgeerts'
 
 from string import Template
 from jsonencoder import ChartsJSONEncoder
+from server import url
 
 import os
 import json
@@ -14,18 +15,26 @@ class MyTemplate(Template):
     idpattern = r'[a-z][_a-z0-9]*'
 
 
-def show_plot(string, html, show):
+def show_plot(inline, html, show, async=False):
     if show == 'inline':
         from IPython.display import HTML
-        return HTML(string)
+        return HTML(inline)
 
     elif show == 'tab':
         print 'Opening new tab...'
-        webbrowser.open_new_tab('file://' + os.path.realpath(html))
+        if async:
+            address = url(async)
+            webbrowser.open_new_tab(address)
+        else:
+            webbrowser.open_new_tab('file://' + os.path.realpath(html))
 
     elif show == 'window':
         print 'Trying to open a window. If this fails we will open a tab...'
-        webbrowser.open_new('file://' + os.path.realpath(html))
+        if async:
+            address = url(async)
+            webbrowser.open_new(address)
+        else:
+            webbrowser.open_new('file://' + os.path.realpath(html))
 
 
 def clean_dir(path):

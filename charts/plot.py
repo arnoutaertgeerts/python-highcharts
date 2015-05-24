@@ -57,7 +57,7 @@ def plot(series, options=dict(), height=400, save=False, stock=False, show='tab'
     series = set_display(series, display)
 
     with open(os.path.join(package_directory, "index.html"), "r") as html:
-        string = MyTemplate(html.read()).substitute(
+        inline = MyTemplate(html.read()).substitute(
             path=package_directory,
             series=json.dumps(series, cls=ChartsJSONEncoder),
             options=json.dumps(options),
@@ -67,24 +67,24 @@ def plot(series, options=dict(), height=400, save=False, stock=False, show='tab'
 
     if save:
         with open(save, "w") as text_file:
-            text_file.write(string)
+            text_file.write(inline)
     else:
         if show != 'inline':
             save = 'index.html'
             with open(save, "w") as text_file:
-                text_file.write(string)
+                text_file.write(inline)
 
-    return show_plot(string, save, show)
+    return show_plot(inline, save, show)
 
 
-def plotasync(series, options=dict(), height=400, name="chart", stock=False, show='tab', display=False, purge=False):
+def plotasync(series, options=dict(), height=400, save="temp", stock=False, show='tab', display=False, purge=False):
     # Set the display property default to false for an asynchronous plot
     """
 
     :param series:
     :param options:
     :param height:
-    :param name:
+    :param save:
     :param stock:
     :param show: Determines how the chart is shown. Can be one of the following options:
         - 'tab': Show the chart in a new tab of the default browser
@@ -96,33 +96,33 @@ def plotasync(series, options=dict(), height=400, name="chart", stock=False, sho
 
     # Clean the directory
     if purge:
-        clean_dir(name)
+        clean_dir(save)
 
     # Convert to a legitimate series object
     series = to_series(series)
 
     # Convert to json files
-    to_json_files(series, name, display)
+    to_json_files(series, save, display)
 
     with open(os.path.join(package_directory, "index-async.html"), "r") as index:
         read = index.read()
 
         html = MyTemplate(read).substitute(
-            path=json.dumps(""),
+            path=json.dumps('/' + save),
             options=json.dumps(options),
             highstock=json.dumps(stock),
             height=str(height) + "px"
         )
 
-        string = MyTemplate(read).substitute(
-            path=json.dumps(name),
+        inline = MyTemplate(read).substitute(
+            path=json.dumps(save),
             options=json.dumps(options),
             highstock=json.dumps(stock),
             height=str(height) + "px"
         )
 
-    html_path = os.path.join(name, 'index.html')
+    html_path = os.path.join(save, 'index.html')
     with open(html_path, "w") as html_file:
         html_file.write(html)
 
-    return Chart(string, html_path, name, show)
+    return Chart(inline, html_path, save, show)
