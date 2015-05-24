@@ -214,6 +214,7 @@ require([
         '$http',
         '$interval',
         '$q', function ($scope, $http, $interval, $q) {
+            var vm = this;
 
             var options = $$options;
             var useHighStock = $$highstock;
@@ -224,21 +225,21 @@ require([
             var displayed = [];
 
             $http.get(path + '/keys.json').success(function (data) {
-                $scope.keys = data;
+                vm.keys = data;
 
-                $scope.selectedItem = null;
-                $scope.searchText = null;
-                $scope.search = search;
-                $scope.selected = {};
-                $scope.selected.keys = [];
+                vm.selectedItem = null;
+                vm.searchText = null;
+                vm.search = search;
+                vm.selected = {};
+                vm.selected.keys = [];
 
-                $scope.options = null;
-                $scope.setOptions = setOptions;
+                vm.options = null;
+                vm.setOptions = setOptions;
 
                 $scope.$watch('selected.keys', updateSeries, true);
 
                 //$interval(update, 1000);
-                $scope.update = update;
+                vm.update = update;
 
                 if (typeof options.chart === "undefined") {
                     var chartOptions = {renderTo: chartContainer.id};
@@ -252,7 +253,7 @@ require([
                 var chart = new ChartType(options);
 
                 //JSONEditor object
-                $scope.obj = {data: chart.options, options: { mode: 'tree' }};
+                vm.obj = {data: chart.options, options: { mode: 'tree' }};
 
                 //Default highchart colors
                 var colors = {};
@@ -263,13 +264,13 @@ require([
                 //Show first series
                 $http.get(path + '/display.json').success(function (keys) {
                     displayed = angular.copy(keys);
-                    $scope.selected.keys = keys;
+                    vm.selected.keys = keys;
                     console.log('displayed init', displayed)
                 });
 
                 function setOptions(options) {
                     newChart(angular.extend(chart.options, options), renderedSeries);
-                    $scope.accordion.toggle(0);
+                    vm.accordion.toggle(0);
                 }
 
                 /**
@@ -288,8 +289,7 @@ require([
                     if(!query) {
                         return [];
                     }
-
-                    var availableKeys = _.difference($scope.keys, $scope.selected.keys);
+                    var availableKeys = _.difference(vm.keys, vm.selected.keys);
                     var results = availableKeys.filter(filter(query));
                     return results.length >= 1 ? results : availableKeys;
                 }
@@ -323,11 +323,11 @@ require([
                 //Check for new keys
                 function update() {
                     $http.get(path + '/keys.json').success(function (data) {
-                        $scope.keys = data;
+                        vm.keys = data;
                         $http.get(path + '/display.json').success(function (data, status) {
                             if (!displayed.equals(data)) {
-                                var newKeys = _.difference(data, $scope.selected.keys);
-                                $scope.selected.keys.push.apply($scope.selected.keys, newKeys);
+                                var newKeys = _.difference(data, vm.selected.keys);
+                                vm.selected.keys.push.apply(vm.selected.keys, newKeys);
                                 displayed = data;
                             }
                         })
@@ -392,17 +392,17 @@ require([
 
 <div id="appid">
 
-    <div ng-controller="MyController">
+    <div ng-controller="MyController as vm">
         <section flex>
             <div layout="column">
                 <md-content class="md-padding autocomplete" layout="row" flex>
                     <div flex="70">
-                        <md-chips ng-model="selected.keys" md-autocomplete-snap md-require-match>
+                        <md-chips ng-model="vm.selected.keys" md-autocomplete-snap md-require-match>
                             <md-autocomplete
-                                    md-selected-item="selectedItem"
-                                    md-search-text="query"
-                                    md-items="item in search(query)"
-                                    md-item-text="item"
+                                    md-selected-item="vm.selectedItem"
+                                    md-search-text="vm.query"
+                                    md-items="item in vm.search(vm.query)"
+                                    md-item-text="vm.item"
                                     md-autoselect="true"
                                     md-min-length="0"
                                     md-no-chache="true"
@@ -417,12 +417,12 @@ require([
                         </md-chips>
                     </div>
                     <div layout="row" layout-align="end end" flex="30">
-                        <md-button ng-click="accordion.toggle(0)">Settings</md-button>
-                        <md-button ng-click="update()">Update</md-button>
+                        <md-button ng-click="vm.accordion.toggle(0)">Settings</md-button>
+                        <md-button ng-click="vm.update()">Update</md-button>
                     </div>
                 </md-content>
                 <md-content class="md-padding" flex>
-                    <v-accordion class="vAccordion--default" control="accordion">
+                    <v-accordion class="vAccordion--default" control="vm.accordion">
                         <v-pane>
                             <v-pane-header style="display:none"></v-pane-header>
                             <v-pane-content>
@@ -430,7 +430,7 @@ require([
                                      style="width: 100%; height: 300px;"></div>
 
                                 <md-button class="md-raised md-primary no-padding" style="margin-left: 0;"
-                                           ng-click="setOptions(obj.data)">Apply
+                                           ng-click="vm.setOptions(obj.data)">Apply
                                 </md-button>
                             </v-pane-content>
                         </v-pane>
