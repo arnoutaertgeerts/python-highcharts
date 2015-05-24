@@ -17,8 +17,11 @@ class Chart():
         else:
             self._plot_multi(*args, **kwargs)
 
-    def _plot_multi(self, series, display=[]):
+    def _plot_multi(self, series):
         series = to_series(series)
+
+        #TODO: Live update the chart and add display option to method
+        display = []
 
         if display is True:
             names = map(lambda x: x['name'], series)
@@ -26,7 +29,10 @@ class Chart():
         else:
             to_json_files(series, self.path, display)
 
-    def _plot_single(self, data, name, display=True):
+    def _plot_single(self, data, name):
+
+        display = []
+
         series = to_series(dict(data=data, name=name))
         if display:
             to_json_files(series, self.path, display=[name])

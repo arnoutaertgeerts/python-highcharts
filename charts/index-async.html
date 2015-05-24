@@ -64,28 +64,28 @@
 
 <script type="text/javascript">
     Array.prototype.equals = function (array) {
-    // if the other array is a false value, return
-    if (!array)
-        return false;
-
-    // compare lengths - can save a lot of time
-    if (this.length != array.length)
-        return false;
-
-    for (var i = 0, l=this.length; i < l; i++) {
-        // Check if we have nested arrays
-        if (this[i] instanceof Array && array[i] instanceof Array) {
-            // recurse into the nested arrays
-            if (!this[i].equals(array[i]))
-                return false;
-        }
-        else if (this[i] != array[i]) {
-            // Warning - two different object instances will never be equal: {x:20} != {x:20}
+        // if the other array is a false value, return
+        if (!array)
             return false;
+
+        // compare lengths - can save a lot of time
+        if (this.length != array.length)
+            return false;
+
+        for (var i = 0, l = this.length; i < l; i++) {
+            // Check if we have nested arrays
+            if (this[i] instanceof Array && array[i] instanceof Array) {
+                // recurse into the nested arrays
+                if (!this[i].equals(array[i]))
+                    return false;
+            }
+            else if (this[i] != array[i]) {
+                // Warning - two different object instances will never be equal: {x:20} != {x:20}
+                return false;
+            }
         }
+        return true;
     }
-    return true;
-}
 </script>
 
 <script type="text/javascript">
@@ -176,207 +176,217 @@
 </script>
 
 <script type="text/javascript">
-    //inject:js
-    require([
-        'highstock',
-        'angular',
-        'underscore',
-        'animate',
-        'aria',
-        'material',
-        'export',
-        'accordion'
-    ], function () {
+//inject:js
+require([
+    'highstock',
+    'angular',
+    'underscore',
+    'animate',
+    'aria',
+    'material',
+    'export',
+    'accordion'
+], function () {
 
-        //Count the number of apps / charts on the page
-        if (window.counter == undefined) {
-            window.counter = 0;
-        } else {
-            window.counter++;
-        }
+    //Count the number of apps / charts on the page
+    if (window.counter == undefined) {
+        window.counter = 0;
+    } else {
+        window.counter++;
+    }
 
-        //Create different containers for the apps and charts
-        var chartContainer = document.getElementById("container");
-        chartContainer.id = "chart" + window.counter.toString();
+    //Create different containers for the apps and charts
+    var chartContainer = document.getElementById("container");
+    chartContainer.id = "chart" + window.counter.toString();
 
-        var appContainer = document.getElementById("appid");
-        appContainer.id = "app" + window.counter.toString();
+    var appContainer = document.getElementById("appid");
+    appContainer.id = "app" + window.counter.toString();
 
-        //The angular app
-        var app = angular.module('myApp', [
-            "ngMaterial",
-            "vAccordion",
-            "ng.jsoneditor"
-        ]);
+    //The angular app
+    var app = angular.module('myApp', [
+        "ngMaterial",
+        "vAccordion",
+        "ng.jsoneditor"
+    ]);
 
-        app.controller('MyController', [
-            '$scope',
-            '$http',
-            '$interval',
-            '$q', function ($scope, $http, $interval, $q) {
+    app.controller('MyController', [
+        '$scope',
+        '$http',
+        '$interval',
+        '$q', function ($scope, $http, $interval, $q) {
 
-                var options = $$options;
-                var useHighStock = $$highstock;
-                var path = $$path;
+            var options = $$options;
+            var useHighStock = $$highstock;
+            var path = $$path;
 
-                var ChartType = useHighStock ? Highcharts.StockChart : Highcharts.Chart;
+            var ChartType = useHighStock ? Highcharts.StockChart : Highcharts.Chart;
 
-                var displayed = [];
+            var displayed = [];
 
-                $http.get(path + '/keys.json').success(function (data) {
-                    $scope.keys = data;
+            $http.get(path + '/keys.json').success(function (data) {
+                $scope.keys = data;
 
-                    $scope.selectedItem = null;
-                    $scope.searchText = null;
-                    $scope.querySearch = querySearch;
-                    $scope.selected = {};
-                    $scope.selected.keys = [];
+                $scope.selectedItem = null;
+                $scope.searchText = null;
+                $scope.search = search;
+                $scope.selected = {};
+                $scope.selected.keys = [];
 
-                    $scope.options = null;
-                    $scope.setOptions = setOptions;
+                $scope.options = null;
+                $scope.setOptions = setOptions;
 
-                    $scope.$watch('selected.keys', updateSeries, true);
+                $scope.$watch('selected.keys', updateSeries, true);
 
-                    //$interval(update, 1000);
-                    $scope.update = update;
+                //$interval(update, 1000);
+                $scope.update = update;
 
-                    if (typeof options.chart === "undefined") {
-                        var chartOptions = {renderTo: chartContainer.id};
-                    } else {
-                        var chartOptions = angular.extend(options["chart"], {renderTo: chartContainer.id});
+                if (typeof options.chart === "undefined") {
+                    var chartOptions = {renderTo: chartContainer.id};
+                } else {
+                    var chartOptions = angular.extend(options["chart"], {renderTo: chartContainer.id});
+                }
+
+                //Initial rendered series
+                var renderedSeries = [];
+                options = angular.extend(options, {chart: chartOptions}, {series: renderedSeries});
+                var chart = new ChartType(options);
+
+                //JSONEditor object
+                $scope.obj = {data: chart.options, options: { mode: 'tree' }};
+
+                //Default highchart colors
+                var colors = {};
+                colors.available = ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9',
+                    '#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1'];
+                colors.used = [];
+
+                //Show first series
+                $http.get(path + '/display.json').success(function (keys) {
+                    displayed = angular.copy(keys);
+                    $scope.selected.keys = keys;
+                    console.log('displayed init', displayed)
+                });
+
+                function setOptions(options) {
+                    newChart(angular.extend(chart.options, options), renderedSeries);
+                    $scope.accordion.toggle(0);
+                }
+
+                /**
+                 * Create filter function for a query string
+                 */
+                function filter(query) {
+                    var lowercaseQuery = angular.lowercase(query);
+
+                    return function filterFn(key) {
+                        return (key.toLowerCase().indexOf(lowercaseQuery) != -1);
+                    };
+
+                }
+
+                function search(query) {
+                    if(!query) {
+                        return [];
                     }
 
-                    //Initial rendered series
-                    var renderedSeries = [];
-                    options = angular.extend(options, {chart: chartOptions}, {series: renderedSeries});
-                    var chart = new ChartType(options);
+                    var availableKeys = _.difference($scope.keys, $scope.selected.keys);
+                    var results = availableKeys.filter(filter(query));
+                    return results.length >= 1 ? results : availableKeys;
+                }
 
-                    //JSONEditor object
-                    $scope.obj = {data: chart.options, options: { mode: 'tree' }};
+                //Update the series
+                function updateSeries(newValue, oldValue) {
+                    var index = {};
 
-                    //Default highchart colors
-                    var colors = {};
-                    colors.available = ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9',
-                        '#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1'];
-                    colors.used = [];
+                    if (newValue.length > oldValue.length) {
+                        //Fetch one key at a time in the asynchronous case
+                        var newKeys = _.difference(newValue, oldValue);
+                        var promises = [];
+                        angular.forEach(newKeys, function (newKey) {
+                            promises.push($http.get(path + '/' + newKey + '.json').success(function (data) {
+                                addSeries(data);
+                            }))
+                        });
 
-                    //Show first series
-                    $http.get(path + '/display.json').success(function (keys) {
-                        displayed = angular.copy(keys);
-                        $scope.selected.keys = keys;
-                        console.log('displayed init', displayed)
-                    });
+                        $q.all(promises).then(function () {
+                            newChart(chart.options, renderedSeries);
+                        });
 
-                    function setOptions(options) {
-                        newChart(angular.extend(chart.options, options), renderedSeries);
-                        $scope.accordion.toggle(0);
+
+                    } else if (newValue.length < oldValue.length) {
+                        var removedKey = _.difference(oldValue, newValue)[0];
+                        deleteSeries(removedKey);
+                        newChart(chart.options, renderedSeries)
                     }
+                }
 
-                    function querySearch(query) {
-                        var availableKeys = _.difference($scope.keys, $scope.selected.keys);
-                        return query ? availableKeys.filter(createFilterFor(query)) : [];
-                    }
-
-                    function createFilterFor(query) {
-                        var lowercaseQuery = angular.lowercase(query);
-                        return function filterFn(key) {
-                            return (angular.lowercase(key).indexOf(lowercaseQuery) > -1);
-                        };
-                    }
-
-                    //Update the series
-                    function updateSeries(newValue, oldValue) {
-                        var index = {};
-
-                        if (newValue.length > oldValue.length) {
-                            //Fetch one key at a time in the asynchronous case
-                            var newKeys = _.difference(newValue, oldValue);
-                            var promises = [];
-                            angular.forEach(newKeys, function (newKey) {
-                                promises.push($http.get(path + '/' + newKey + '.json').success(function (data) {
-                                    addSeries(data);
-                                }))
-                            });
-
-                            $q.all(promises).then(function () {
-                                newChart(chart.options, renderedSeries);
-                            });
-
-
-                        } else if (newValue.length < oldValue.length) {
-                            var removedKey = _.difference(oldValue, newValue)[0];
-                            deleteSeries(removedKey);
-                            newChart(chart.options, renderedSeries)
-                        }
-                    }
-
-                    //Check for new keys
-                    function update() {
-                        $http.get(path + '/keys.json').success(function (data) {
-                            $scope.keys = data;
-                            $http.get(path + '/display.json').success(function(data, status) {
-                                if (!displayed.equals(data)) {
-                                    var newKeys = _.difference(data, $scope.selected.keys);
-                                    $scope.selected.keys.push.apply($scope.selected.keys, newKeys);
-                                    displayed = data;
-                                }
-                            })
+                //Check for new keys
+                function update() {
+                    $http.get(path + '/keys.json').success(function (data) {
+                        $scope.keys = data;
+                        $http.get(path + '/display.json').success(function (data, status) {
+                            if (!displayed.equals(data)) {
+                                var newKeys = _.difference(data, $scope.selected.keys);
+                                $scope.selected.keys.push.apply($scope.selected.keys, newKeys);
+                                displayed = data;
+                            }
                         })
-                    }
+                    })
+                }
 
-                    function findSeries(series, key) {
-                        var index = {};
+                function findSeries(series, key) {
+                    var index = {};
 
-                        var arrayLength = series.length;
-                        for (var i = 0; i < arrayLength; i++) {
-                            if (series[i].name == key) {
-                                index = i
-                            }
+                    var arrayLength = series.length;
+                    for (var i = 0; i < arrayLength; i++) {
+                        if (series[i].name == key) {
+                            index = i
                         }
-                        return index
                     }
+                    return index
+                }
 
-                    function newChart(options, series) {
-                        var plotOptions = {
-                            series: {
-                                animation: false
-                            }
-                        };
+                function newChart(options, series) {
+                    var plotOptions = {
+                        series: {
+                            animation: false
+                        }
+                    };
 
-                        //Get zoom
-                        var xExtremes = chart.xAxis[0].getExtremes();
+                    //Get zoom
+                    var xExtremes = chart.xAxis[0].getExtremes();
 
-                        //Re-plot the chart
-                        chart.destroy();
-                        chart = new ChartType(angular.extend(options, {plotOptions: plotOptions}, {series: series}));
+                    //Re-plot the chart
+                    chart.destroy();
+                    chart = new ChartType(angular.extend(options, {plotOptions: plotOptions}, {series: series}));
 
-                        //Reset the zoom
-                        chart.xAxis[0].setExtremes(xExtremes.min, xExtremes.max, false, false);
+                    //Reset the zoom
+                    chart.xAxis[0].setExtremes(xExtremes.min, xExtremes.max, false, false);
 
-                        //Re-draw chart
-                        chart.redraw();
-                    }
+                    //Re-draw chart
+                    chart.redraw();
+                }
 
-                    function addSeries(newSeries) {
-                        renderedSeries.push(angular.extend(newSeries, {color: colors.available[0]}));
-                        colors.used.push(colors.available.splice(0, 1)[0]);
-                    }
+                function addSeries(newSeries) {
+                    renderedSeries.push(angular.extend(newSeries, {color: colors.available[0]}));
+                    colors.used.push(colors.available.splice(0, 1)[0]);
+                }
 
-                    function deleteSeries(name) {
-                        var index = findSeries(renderedSeries, name);
-                        var deletedColor = renderedSeries.splice(index, 1).color;
-                        var colorIndex = colors.used.indexOf(deletedColor);
-                        colors.available.push(colors.used.splice(colorIndex, 1)[0]);
-                    }
+                function deleteSeries(name) {
+                    var index = findSeries(renderedSeries, name);
+                    var deletedColor = renderedSeries.splice(index, 1).color;
+                    var colorIndex = colors.used.indexOf(deletedColor);
+                    colors.available.push(colors.used.splice(colorIndex, 1)[0]);
+                }
 
-                }).error(function (error) {
-                    console.log(error);
-                })
+            }).error(function (error) {
+                console.log(error);
+            })
 
-            }]);
+        }]);
 
-        angular.bootstrap(appContainer, ['myApp']);
-    });
+    angular.bootstrap(appContainer, ['myApp']);
+});
 </script>
 
 
@@ -386,15 +396,16 @@
         <section flex>
             <div layout="column">
                 <md-content class="md-padding autocomplete" layout="row" flex>
-                    <div flex="80">
+                    <div flex="70">
                         <md-chips ng-model="selected.keys" md-autocomplete-snap md-require-match>
                             <md-autocomplete
                                     md-selected-item="selectedItem"
-                                    md-search-text="searchText"
-                                    md-items="item in querySearch(searchText)"
+                                    md-search-text="query"
+                                    md-items="item in search(query)"
                                     md-item-text="item"
                                     md-autoselect="true"
-                                    md-min-length="1"
+                                    md-min-length="0"
+                                    md-no-chache="true"
                                     placeholder="Add a variable">
                                 <span md-highlight-text="searchText">{{item}}</span>
                             </md-autocomplete>
@@ -405,7 +416,7 @@
                             </md-chip-template>
                         </md-chips>
                     </div>
-                    <div flex="20" layout-align="end center" layout="row">
+                    <div layout="row" layout-align="end end" flex="30">
                         <md-button ng-click="accordion.toggle(0)">Settings</md-button>
                         <md-button ng-click="update()">Update</md-button>
                     </div>
