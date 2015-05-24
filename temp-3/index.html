@@ -216,10 +216,10 @@ require([
         '$q', function ($scope, $http, $interval, $q) {
             var vm = this;
 
-            var options = $$options;
-            var useHighStock = $$highstock;
-            var path = $$path;
-            var live = $$live;
+            var options = {"chart": {"type": "area"}};
+            var useHighStock = false;
+            var path = "/temp-3";
+            var live = true;
 
             var ChartType = useHighStock ? Highcharts.StockChart : Highcharts.Chart;
 
@@ -444,7 +444,7 @@ require([
                     </v-accordion>
                 </md-content>
                 <md-content class="md-padding" flex>
-                    <div id="container" style="height: $$height; min-width: 310px"></div>
+                    <div id="container" style="height: 400px; min-width: 310px"></div>
                 </md-content>
             </div>
         </section>

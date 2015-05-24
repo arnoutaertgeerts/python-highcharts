@@ -77,7 +77,9 @@ def plot(series, options=dict(), height=400, save=False, stock=False, show='tab'
     return show_plot(inline, save, show)
 
 
-def plotasync(series, options=dict(), height=400, save="temp", stock=False, show='tab', display=False, purge=False):
+def plotasync(
+    series, options=dict(),
+    height=400, save="temp", stock=False, show='tab', display=False, purge=False, live=False):
     # Set the display property default to false for an asynchronous plot
     """
 
@@ -111,14 +113,16 @@ def plotasync(series, options=dict(), height=400, save="temp", stock=False, show
             path=json.dumps('/' + save),
             options=json.dumps(options),
             highstock=json.dumps(stock),
-            height=str(height) + "px"
+            height=str(height) + "px",
+            live=json.dumps(live)
         )
 
         inline = MyTemplate(read).substitute(
             path=json.dumps(save),
             options=json.dumps(options),
             highstock=json.dumps(stock),
-            height=str(height) + "px"
+            height=str(height) + "px",
+            live=json.dumps(live)
         )
 
     html_path = os.path.join(save, 'index.html')
