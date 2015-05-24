@@ -1,5 +1,4 @@
 __author__ = 'Arnout Aertgeerts'
-__version__ = '0.0.1'
 
 from core import MyTemplate, to_json_files, to_series, clean_dir, set_display, show_plot
 from jsonencoder import ChartsJSONEncoder
@@ -31,9 +30,12 @@ def stock(*args, **kwargs):
     return plot(*args, stock=True, **kwargs)
 
 
-def plot(series, options=dict(), height=400, save=False, stock=False, show='tab', display=True, type='line'):
+def plot(
+    series, options=dict(), type='line',
+    height=400, save=False, stock=False, show='tab', display=True):
     """
     Make a highchart plot with all data embedded in the HTML
+    :param type: Type of the chart
     :param series: The necessary data, can be a list of dictionaries or a dataframe
     :param options: Options for the chart
     :param height: Chart height
@@ -48,7 +50,11 @@ def plot(series, options=dict(), height=400, save=False, stock=False, show='tab'
     :return:
     """
 
-    options['chart'] = dict(type=type)
+    try:
+        if not options['chart']:
+            options['chart'] = dict(type=type)
+    except KeyError:
+        options['chart'] = dict(type=type)
 
     # Convert to a legitimate series object
     series = to_series(series)
@@ -78,23 +84,31 @@ def plot(series, options=dict(), height=400, save=False, stock=False, show='tab'
 
 
 def plotasync(
-    series, options=dict(),
+    series, options=dict(), type='line',
     height=400, save="temp", stock=False, show='tab', display=False, purge=False, live=False):
-    # Set the display property default to false for an asynchronous plot
     """
 
-    :param series:
-    :param options:
-    :param height:
-    :param save:
-    :param stock:
+    :param type: Type of the chart. Can be line, area, spline, pie, bar, ...
+    :param display: Set to true to display all, False to display none or an array of names for a specific selection
+    :param purge: Set to true to clean the directory
+    :param live: Set to true to keep the chart in sync with data in the directory. Currently only works for show='tab'
+    :param series: The series object which contains the data
+    :param options: The chart display options
+    :param height: Height of the chart
+    :param save: Name of the directory to store the data
+    :param stock: Set to true to use highstock
     :param show: Determines how the chart is shown. Can be one of the following options:
         - 'tab': Show the chart in a new tab of the default browser
         - 'window': Show the chart in a new window of the default browser
         - 'inline': Show the chart inline (only works in IPython notebook)
-        - False: Do not show the chart
-    :return:
+    :return: A chart object
     """
+
+    try:
+        if not options['chart']:
+            options['chart'] = dict(type=type)
+    except KeyError:
+        options['chart'] = dict(type=type)
 
     # Clean the directory
     if purge:
@@ -105,6 +119,9 @@ def plotasync(
 
     # Convert to json files
     to_json_files(series, save, display)
+
+    if show == 'inline':
+        live = False
 
     with open(os.path.join(package_directory, "index-async.html"), "r") as index:
         read = index.read()

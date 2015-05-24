@@ -1,7 +1,7 @@
 __author__ = 'arnoutaertgeerts'
 
 
-from core import to_series, to_json_files, set_display, show_plot
+from core import to_series, to_json_files, show_plot
 
 
 class Chart():

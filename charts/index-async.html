@@ -226,6 +226,8 @@ require([
             var displayed = [];
 
             $http.get(path + '/keys.json').success(function (data) {
+                var sync;
+
                 vm.keys = data;
 
                 vm.selectedItem = null;
@@ -234,16 +236,18 @@ require([
                 vm.selected = {};
                 vm.selected.keys = [];
 
+                vm.showLiveToggle = live;
                 vm.live = live;
 
                 vm.options = null;
                 vm.setOptions = setOptions;
 
                 $scope.$watch('vm.selected.keys', updateSeries, true);
+                $scope.$watch('vm.live', toggleSync);
 
-                if (live) {
-                    $interval(update, 1000);
-                }
+                angular.element(appContainer).on('destroy', function() {
+                    console.log('destroyed!');
+                });
 
                 vm.update = update;
 
@@ -274,6 +278,19 @@ require([
                     console.log('displayed init', displayed)
                 });
 
+                function toggleSync() {
+                    vm.live ? startSync() : stopSync();
+                }
+
+                function startSync() {
+                    stopSync();
+                    sync = $interval(update, 1000)
+                }
+
+                function stopSync() {
+                    $interval.cancel(sync)
+                }
+
                 function setOptions(options) {
                     newChart(angular.extend(chart.options, options), renderedSeries);
                     vm.accordion.toggle(0);
@@ -292,7 +309,7 @@ require([
                 }
 
                 function search(query) {
-                    if(!query) {
+                    if (!query) {
                         return [];
                     }
                     var availableKeys = _.difference(vm.keys, vm.selected.keys);
@@ -402,7 +419,7 @@ require([
         <section flex>
             <div layout="column">
                 <md-content class="md-padding autocomplete" layout="row" flex>
-                    <div flex="70">
+                    <div flex="60">
                         <md-chips ng-model="vm.selected.keys" md-autocomplete-snap md-require-match>
                             <md-autocomplete
                                     md-selected-item="vm.selectedItem"
@@ -422,9 +439,12 @@ require([
                             </md-chip-template>
                         </md-chips>
                     </div>
-                    <div layout="row" layout-align="end end" flex="30">
+                    <div layout="row" layout-align="end center" flex="40">
                         <md-button ng-click="vm.accordion.toggle(0)">Settings</md-button>
-                        <md-button ng-click="vm.update()" ng-show="!live">Update</md-button>
+                        <md-button ng-click="vm.update()" ng-disabled="vm.live">Update</md-button>
+                        <md-switch ng-model="vm.live" aria-label="Switch 1" ng-if="vm.showLiveToggle">
+                            <p> Live</p>
+                        </md-switch>
                     </div>
                 </md-content>
                 <md-content class="md-padding" flex>
