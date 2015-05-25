@@ -31,7 +31,7 @@ def stock(*args, **kwargs):
 
 
 def plot(
-    series, options=dict(), type='line',
+    series, options=dict(), type='line', name=False,
     height=400, save=False, stock=False, show='tab', display=True):
     """
     Make a highchart plot with all data embedded in the HTML
@@ -45,7 +45,6 @@ def plot(
         - 'tab': Show the chart in a new tab of the default browser
         - 'window': Show the chart in a new window of the default browser
         - 'inline': Show the chart inline (only works in IPython notebook)
-        - False: Do not show the chart
     :param display: A list containing the keys of the variables you want to show initially in the plot
     :return:
     """
@@ -57,7 +56,7 @@ def plot(
         options['chart'] = dict(type=type)
 
     # Convert to a legitimate series object
-    series = to_series(series)
+    series = to_series(series, name)
 
     # Set the display option
     series = set_display(series, display)
@@ -116,9 +115,10 @@ def plotasync(
 
     # Convert to a legitimate series object
     series = to_series(series)
+    series = set_display(series, display)
 
     # Convert to json files
-    to_json_files(series, save, display)
+    to_json_files(series, save)
 
     if show == 'inline':
         live = False

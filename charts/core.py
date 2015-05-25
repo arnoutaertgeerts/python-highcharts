@@ -43,7 +43,7 @@ def clean_dir(path):
     os.makedirs(path)
 
 
-def to_json_files(series, path, display):
+def to_json_files(series, path):
     try:
         with open(os.path.join(path, 'keys.json'), "r") as keys_file:
             keys = json.loads(keys_file.read())
@@ -51,21 +51,12 @@ def to_json_files(series, path, display):
         keys = []
 
     for s in series:
-        n = s["name"]
-        if n not in keys:
-            keys.append(n)
-            with open(os.path.join(path, n + ".json"), "w") as json_file:
+        if s["name"] not in map(lambda x: x["name"], keys):
+            keys.append(dict(name=s["name"], display=s["display"]))
+            with open(os.path.join(path, s["name"] + ".json"), "w") as json_file:
                 json_file.write(json.dumps(s, cls=ChartsJSONEncoder))
         else:
-            print "Careful: '%s' was already present as key and is not added to the chart!" % n
-
-    with open(os.path.join(path, 'display.json'), "w") as display_file:
-        if display is True:
-            display_file.write(json.dumps(keys))
-        elif display is False:
-            display_file.write(json.dumps([]))
-        else:
-            display_file.write(json.dumps(display))
+            print "Careful: '%s' was already present as key and is not added to the chart!" % s["name"]
 
     with open(os.path.join(path, 'keys.json'), "w") as keys_file:
         keys_file.write(json.dumps(keys))
@@ -120,7 +111,7 @@ def list_to_series(array):
     )
 
 
-def to_series(series):
+def to_series(series, name=False):
     # Dictionary?
     if isinstance(series, dict):
         return [series]
@@ -135,7 +126,7 @@ def to_series(series):
     # List?
     try:
         if isinstance(series, list):
-            return [dict(data=series, name='variable')]
+            return [dict(data=series, name=name)]
     except KeyError:
         pass
 
@@ -143,7 +134,7 @@ def to_series(series):
     try:
         import numpy as np
         if isinstance(series, np.ndarray):
-            return [dict(data=series)]
+            return [dict(data=series, name=name)]
     except ImportError:
         pass
 

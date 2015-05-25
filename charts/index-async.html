@@ -13,7 +13,8 @@
             'aria': "https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.15/angular-aria.min",
             'material': "https://cdnjs.cloudflare.com/ajax/libs/angular-material/0.9.4/angular-material.min",
             'accordion': "https://cdn.rawgit.com/LukaszWatroba/v-accordion/v1.2.3/dist/v-accordion.min",
-            'json-editor': "https://cdn.rawgit.com/arnoutaertgeerts/jsoneditor/v4.2.0/dist/jsoneditor"
+            'json-editor': "https://cdn.rawgit.com/arnoutaertgeerts/jsoneditor/v4.2.0/dist/jsoneditor",
+            'select': "https://cdn.rawgit.com/arnoutaertgeerts/angular-multi-select/master/isteven-multi-select"
         },
 
         shim: {
@@ -33,13 +34,16 @@
             'animate': ['angular'],
             'aria': ['angular'],
             'material': ['angular', 'animate', 'aria'],
-            'accordion': ['angular']
+            'accordion': ['angular'],
+            'select': ['angular']
         }
     });
 </script>
 
 <!-- Stylesheets -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/angular-material/0.9.4/angular-material.min.css"/>
+<link rel="stylesheet"
+      href="https://cdn.rawgit.com/arnoutaertgeerts/angular-multi-select/master/isteven-multi-select.css"/>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="https://cdn.rawgit.com/LukaszWatroba/v-accordion/v1.2.3/dist/v-accordion.min.css"/>
 <link rel="stylesheet" href="https://cdn.rawgit.com/arnoutaertgeerts/jsoneditor/master/dist/jsoneditor.min.css"/>
@@ -185,7 +189,8 @@ require([
     'aria',
     'material',
     'export',
-    'accordion'
+    'accordion',
+    'select'
 ], function () {
 
     //Count the number of apps / charts on the page
@@ -206,7 +211,8 @@ require([
     var app = angular.module('myApp', [
         "ngMaterial",
         "vAccordion",
-        "ng.jsoneditor"
+        "ng.jsoneditor",
+        "isteven-multi-select"
     ]);
 
     app.controller('MyController', [
@@ -230,9 +236,6 @@ require([
 
                 vm.keys = data;
 
-                vm.selectedItem = null;
-                vm.searchText = null;
-                vm.search = search;
                 vm.selected = {};
                 vm.selected.keys = [];
 
@@ -245,7 +248,7 @@ require([
                 $scope.$watch('vm.selected.keys', updateSeries, true);
                 $scope.$watch('vm.live', toggleSync);
 
-                angular.element(appContainer).on('destroy', function() {
+                angular.element(appContainer).on('destroy', function () {
                     console.log('destroyed!');
                 });
 
@@ -270,13 +273,6 @@ require([
                 colors.available = ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9',
                     '#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1'];
                 colors.used = [];
-
-                //Show first series
-                $http.get(path + '/display.json').success(function (keys) {
-                    displayed = angular.copy(keys);
-                    vm.selected.keys = keys;
-                    console.log('displayed init', displayed)
-                });
 
                 function toggleSync() {
                     vm.live ? startSync() : stopSync();
@@ -319,7 +315,13 @@ require([
 
                 //Update the series
                 function updateSeries(newValue, oldValue) {
-                    var index = {};
+                    newValue = newValue.map(function (element) {
+                        return element.name
+                    });
+
+                    oldValue = oldValue.map(function (element) {
+                        return element.name
+                    });
 
                     if (newValue.length > oldValue.length) {
                         //Fetch one key at a time in the asynchronous case
@@ -346,14 +348,19 @@ require([
                 //Check for new keys
                 function update() {
                     $http.get(path + '/keys.json').success(function (data) {
-                        vm.keys = data;
-                        $http.get(path + '/display.json').success(function (data, status) {
-                            if (!displayed.equals(data)) {
-                                var newKeys = _.difference(data, vm.selected.keys);
-                                vm.selected.keys.push.apply(vm.selected.keys, newKeys);
-                                displayed = data;
-                            }
-                        })
+
+                        //Get the new keys
+                        var oldKeys = vm.keys.map(function(element) {return element.name});
+
+                        //Get the new key objects
+                        var newKeyObjects = _.filter(data, function(element) {
+                            return oldKeys.indexOf(element.name) == -1
+                        });
+
+                        //Add the new object to the scope
+                        vm.keys.push.apply(vm.keys, newKeyObjects);
+                        vm.selected.keys.push.apply(vm.selected.keys, newKeyObjects)
+
                     })
                 }
 
@@ -418,35 +425,26 @@ require([
     <div ng-controller="MyController as vm">
         <section flex>
             <div layout="column">
-                <md-content class="md-padding autocomplete" layout="row" flex>
+                <div class="md-padding" layout="row" flex>
                     <div flex="60">
-                        <md-chips ng-model="vm.selected.keys" md-autocomplete-snap md-require-match>
-                            <md-autocomplete
-                                    md-selected-item="vm.selectedItem"
-                                    md-search-text="vm.query"
-                                    md-items="item in vm.search(vm.query)"
-                                    md-item-text="vm.item"
-                                    md-autoselect="true"
-                                    md-min-length="0"
-                                    md-no-chache="true"
-                                    placeholder="Add a variable">
-                                <span md-highlight-text="searchText">{{item}}</span>
-                            </md-autocomplete>
-                            <md-chip-template>
-                                <span>
-                                  <strong>{{$chip}}</strong>
-                                </span>
-                            </md-chip-template>
-                        </md-chips>
+                        <isteven-multi-select
+                                input-model="vm.keys"
+                                output-model="vm.selected.keys"
+                                button-label="name"
+                                item-label="name"
+                                tick-property="display"
+                                max-height="250px"
+                                >
+                        </isteven-multi-select>
                     </div>
-                    <div layout="row" layout-align="end center" flex="40">
+                    <md-content layout="row" layout-align="end end" flex="40">
                         <md-button ng-click="vm.accordion.toggle(0)">Settings</md-button>
                         <md-button ng-click="vm.update()" ng-disabled="vm.live">Update</md-button>
                         <md-switch ng-model="vm.live" aria-label="Switch 1" ng-if="vm.showLiveToggle">
                             <p> Live</p>
                         </md-switch>
-                    </div>
-                </md-content>
+                    </md-content>
+                </div>
                 <md-content class="md-padding" flex>
                     <v-accordion class="vAccordion--default" control="vm.accordion">
                         <v-pane>

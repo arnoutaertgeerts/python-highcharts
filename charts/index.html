@@ -14,7 +14,8 @@
             'aria': "https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.15/angular-aria.min",
             'material': "https://cdnjs.cloudflare.com/ajax/libs/angular-material/0.9.4/angular-material.min",
             'accordion': "https://cdn.rawgit.com/LukaszWatroba/v-accordion/v1.2.3/dist/v-accordion.min",
-            'json-editor': "https://cdn.rawgit.com/arnoutaertgeerts/jsoneditor/v4.2.0/dist/jsoneditor"
+            'json-editor': "https://cdn.rawgit.com/arnoutaertgeerts/jsoneditor/v4.2.0/dist/jsoneditor",
+            'select': "https://cdn.rawgit.com/arnoutaertgeerts/angular-multi-select/master/isteven-multi-select"
         },
 
         shim: {
@@ -34,12 +35,15 @@
             'animate': ['angular'],
             'aria': ['angular'],
             'material': ['angular', 'animate', 'aria'],
-            'accordion': ['angular']
+            'accordion': ['angular'],
+            'select': ['angular']
         }
     });
 </script>
 
 <!-- Stylesheets -->
+<link rel="stylesheet"
+      href="https://cdn.rawgit.com/arnoutaertgeerts/angular-multi-select/master/isteven-multi-select.css"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/angular-material/0.9.4/angular-material.min.css"/>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="https://cdn.rawgit.com/LukaszWatroba/v-accordion/v1.2.3/dist/v-accordion.min.css"/>
@@ -160,7 +164,8 @@
         'aria',
         'material',
         'export',
-        'accordion'
+        'accordion',
+        'select'
     ], function () {
 
         //Count the number of apps / charts on the page
@@ -181,13 +186,14 @@
         var app = angular.module('myApp', [
             "ngMaterial",
             "vAccordion",
-            "ng.jsoneditor"
+            "ng.jsoneditor",
+            "isteven-multi-select"
         ]);
 
         app.controller('MyController', ['$scope', function ($scope) {
 
             var series = $$series;
-            var options =$$options;
+            var options = $$options;
             var useHighStock = $$highstock;
 
             //Choose a chart type
@@ -195,7 +201,10 @@
 
             var keys = [];
             angular.forEach(series, function (serie) {
-                keys.push(serie.name)
+                keys.push({
+                    name: serie.name,
+                    selected: serie.display
+                })
             });
 
             $scope.keys = keys;
@@ -211,16 +220,14 @@
 
             $scope.$watch('selected.keys', updateSeries, true);
 
-            if (typeof options.chart === "undefined"){
+            if (typeof options.chart === "undefined") {
                 var chartOptions = {renderTo: chartContainer.id};
             } else {
                 var chartOptions = angular.extend(options["chart"], {renderTo: chartContainer.id});
             }
 
-
-
             //Initial rendered series
-            var renderedSeries =  [];
+            var renderedSeries = [];
             options = angular.extend(options, {chart: chartOptions}, {series: renderedSeries});
             var chart = new ChartType(options);
 
@@ -234,9 +241,14 @@
             colors.used = [];
 
             //Show first series
-            $scope.selected.keys = _.filter(series, function(obj) {
+            $scope.selected.keys = _.filter(series,function (obj) {
                 return obj.display == true || obj.display === true
-            }).map(function(serie) {return serie.name});
+            }).map(function (serie) {
+                return {
+                    name: serie.name,
+                    selected: true
+                }
+            });
 
             updateSeries($scope.selected.keys, []);
 
@@ -259,10 +271,17 @@
 
             // Update the series
             function updateSeries(newValue, oldValue) {
+                newValue = newValue.map(function (element) {
+                    return element.name
+                });
+
+                oldValue = oldValue.map(function (element) {
+                    return element.name
+                });
 
                 if (newValue.length > oldValue.length) {
                     var newKeys = _.difference(newValue, oldValue);
-                    angular.forEach(newKeys, function(newKey) {
+                    angular.forEach(newKeys, function (newKey) {
                         var index = findSeries(series, newKey);
                         var newSeries = series[index];
                         addSeries(newSeries);
@@ -270,8 +289,11 @@
                     newChart(chart.options, renderedSeries);
 
                 } else if (newValue.length < oldValue.length) {
-                    var removedKey = _.difference(oldValue, newValue)[0];
-                    deleteSeries(removedKey);
+                    var removedKeys = _.difference(oldValue, newValue);
+                    angular.forEach(removedKeys, function (removedKey) {
+                        deleteSeries(removedKey);
+                    });
+
                     newChart(chart.options, renderedSeries)
                 }
             }
@@ -289,7 +311,7 @@
             }
 
             function newChart(options, series) {
-                var plotOptions =  {
+                var plotOptions = {
                     series: {
                         animation: false
                     }
@@ -300,7 +322,7 @@
 
                 //Re-plot the chart
                 chart.destroy();
-                chart = new ChartType(angular.extend(options, {plotOptions: plotOptions}, {series:series}));
+                chart = new ChartType(angular.extend(options, {plotOptions: plotOptions}, {series: series}));
 
                 //Reset the zoom
                 chart.xAxis[0].setExtremes(xExtremes.min, xExtremes.max, false, false);
@@ -333,38 +355,34 @@
     <div ng-controller="MyController">
         <section flex>
             <div layout="column">
-                <md-content class="md-padding autocomplete" layout="row" flex>
+                <div class="md-padding" layout="row" flex>
                     <div flex="80">
-                        <md-chips ng-model="selected.keys" md-autocomplete-snap md-require-match>
-                            <md-autocomplete
-                                    md-selected-item="selectedItem"
-                                    md-search-text="searchText"
-                                    md-items="item in querySearch(searchText)"
-                                    md-item-text="item"
-                                    md-autoselect="true"
-                                    md-min-length="1"
-                                    placeholder="Add a variable">
-                                <span md-highlight-text="searchText">{{item}}</span>
-                            </md-autocomplete>
-                            <md-chip-template>
-                                <span>
-                                  <strong>{{$chip}}</strong>
-                                </span>
-                            </md-chip-template>
-                        </md-chips>
+                        <isteven-multi-select
+                                input-model="keys"
+                                output-model="selected.keys"
+                                button-label="name"
+                                item-label="name"
+                                tick-property="selected"
+                                max-height="250px"
+                                >
+                        </isteven-multi-select>
                     </div>
                     <div flex="20" layout-align="end center" layout="row">
                         <md-button ng-click="accordion.toggle(0)">Settings</md-button>
                     </div>
-                </md-content>
+                </div>
+
                 <md-content class="md-padding" flex>
                     <v-accordion class="vAccordion--default" control="accordion">
                         <v-pane>
                             <v-pane-header style="display:none"></v-pane-header>
                             <v-pane-content>
-                                <div ng-jsoneditor ng-model="obj.data" options="obj.options" style="width: 100%; height: 300px;"></div>
+                                <div ng-jsoneditor ng-model="obj.data" options="obj.options"
+                                     style="width: 100%; height: 300px;"></div>
 
-                                <md-button class="md-raised md-primary no-padding" style="margin-left: 0;" ng-click="setOptions(obj.data)">Apply</md-button>
+                                <md-button class="md-raised md-primary no-padding" style="margin-left: 0;"
+                                           ng-click="setOptions(obj.data)">Apply
+                                </md-button>
                             </v-pane-content>
                         </v-pane>
 

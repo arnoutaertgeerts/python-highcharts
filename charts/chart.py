@@ -1,7 +1,7 @@
 __author__ = 'arnoutaertgeerts'
 
 
-from core import to_series, to_json_files, show_plot
+from core import to_series, to_json_files, show_plot, set_display
 
 
 class Chart():
@@ -19,19 +19,15 @@ class Chart():
 
     def _plot_multi(self, series, display):
         series = to_series(series)
+        series = set_display(series, display)
 
-        if display is True:
-            names = map(lambda x: x['name'], series)
-            to_json_files(series, self.path, names)
-        else:
-            to_json_files(series, self.path, display)
+        to_json_files(series, self.path)
 
     def _plot_single(self, data, name, display):
         series = to_series(dict(data=data, name=name))
-        if display:
-            to_json_files(series, self.path, display=[name])
-        else:
-            to_json_files(series, self.path, display=[])
+        series = set_display(series, display)
+
+        to_json_files(series, self.path, )
 
     def show(self):
         return show_plot(self.inline, self.html, self.show_property, async=self.path)
