@@ -1,7 +1,5 @@
 __author__ = 'arnout'
 
-import pandas as pd
-
 
 def df_to_series(df, display=[]):
     """Prepare data from dataframe for plotting with python-highcharts.
@@ -13,6 +11,8 @@ def df_to_series(df, display=[]):
     """
 
     plot_columns = display
+
+    import pandas as pd
 
     df.index = df.index.tz_localize(None)
     index = [int(x/1e6) for x in df.index.asi8]
