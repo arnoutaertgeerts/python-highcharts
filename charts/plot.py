@@ -31,7 +31,7 @@ def stock(*args, **kwargs):
 
 
 def plot(
-    series, options=dict(), type='line', name=False,
+    series, options=dict(chart=dict(type='line')), type='line', name=False,
     height=400, save=False, stock=False, show='tab', display=True):
     """
     Make a highchart plot with all data embedded in the HTML
@@ -50,7 +50,7 @@ def plot(
     """
 
     try:
-        if not options['chart']:
+        if not options['chart']['type']:
             options['chart'] = dict(type=type)
     except KeyError:
         options['chart'] = dict(type=type)
