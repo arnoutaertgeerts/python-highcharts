@@ -377,18 +377,16 @@ require([
                 }
 
                 function newChart(options, series) {
-                    var plotOptions = {
-                        series: {
-                            animation: false
-                        }
-                    };
+                    //Disable animation
+                    newOptions = angular.extend(options, {series: series});
+                    newOptions.plotOptions['series'] = {animation: false};
 
                     //Get zoom
                     var xExtremes = chart.xAxis[0].getExtremes();
 
                     //Re-plot the chart
                     chart.destroy();
-                    chart = new ChartType(angular.extend(options, {plotOptions: plotOptions}, {series: series}));
+                    chart = new ChartType(newOptions);
 
                     //Reset the zoom
                     chart.xAxis[0].setExtremes(xExtremes.min, xExtremes.max, false, false);
