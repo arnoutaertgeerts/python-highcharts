@@ -94,12 +94,12 @@ def df_to_series(df):
 
     df.index = df.index.tz_localize(None)
     index = [int(x/1e6) for x in df.index.asi8]
+    df = df.where((pd.notnull(df)), None)
     series = []
     for col in df:
         data = []
-        ts = df[col].where((pd.notnull(df[col])), None)
         for i, x in enumerate(index):
-            data.append([index[i], ts.iloc[i]])
+            data.append([index[i], df[col].iloc[i]])
         my_dict = {'data': data,'name': col}
         series.append(my_dict)
     return series
