@@ -31,11 +31,11 @@ def stock(*args, **kwargs):
 
 
 def plot(
-    series, options={}, type='line', name=False,
-    height=400, save=False, stock=False, show='tab', display=True):
+        series, options=dict(), type='line', name=False,
+        height=400, save=False, stock=False, show='tab', display=True):
     """
     Make a highchart plot with all data embedded in the HTML
-    :param type: Type of the chart
+    :param type: Type of the chart (will overwrite options['chart']['type'] if specified).
     :param series: The necessary data, can be a list of dictionaries or a dataframe
     :param options: Options for the chart
     :param height: Chart height
@@ -48,8 +48,11 @@ def plot(
     :param display: A list containing the keys of the variables you want to show initially in the plot
     :return:
     """
-
-    options = dict(chart=dict(type=type))
+    try:
+        if options['chart']:
+            options['chart'].update(dict(type=type))
+    except KeyError:
+        options['chart'] = dict(type=type)
 
     # Convert to a legitimate series object
     series = to_series(series, name)
