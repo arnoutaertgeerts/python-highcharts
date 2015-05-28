@@ -36,4 +36,4 @@ charts.plot(series, options, height=500, stock=True, show='inline')
 
 Don't be affraid to play with the chart, it's interactive :) Try typing in `OHLC` in the variable selector or viewing a different time period by squeezing the bottom scroll bar!
 
-For more, checkout this [notebook](http://nbviewer.ipython.org/github/arnoutaertgeerts/python-highcharts/blob/master/Quickstart.ipynb)!
+For more, checkout this [notebook](http://nbviewer.ipython.org/github/arnoutaertgeerts/python-highcharts/blob/master/Tutorial.ipynb)!
