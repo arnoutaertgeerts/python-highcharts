@@ -82,15 +82,15 @@ def plot(
 
 
 def plotasync(
-    series, options=dict(), type='line',
-    height=400, save="temp", stock=False, show='tab', display=False, purge=False, live=False):
+        series=None, options=dict(), type='line',
+        height=400, save="temp", stock=False, show='tab', display=False, purge=False, live=False):
     """
-
     :param type: Type of the chart. Can be line, area, spline, pie, bar, ...
     :param display: Set to true to display all, False to display none or an array of names for a specific selection
     :param purge: Set to true to clean the directory
     :param live: Set to true to keep the chart in sync with data in the directory. Currently only works for show='tab'
-    :param series: The series object which contains the data
+    :param series: The series object which contains the data. If this is not specified, the plot will look for json
+                   files in the save directory.
     :param options: The chart display options
     :param height: Height of the chart
     :param save: Name of the directory to store the data
@@ -112,12 +112,13 @@ def plotasync(
     if purge:
         clean_dir(save)
 
-    # Convert to a legitimate series object
-    series = to_series(series)
-    series = set_display(series, display)
+    if series:
+        # Convert to a legitimate series object
+        series = to_series(series)
+        series = set_display(series, display)
 
-    # Convert to json files
-    to_json_files(series, save)
+        # Convert to json files
+        to_json_files(series, save)
 
     if show == 'inline':
         live = False
