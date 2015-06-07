@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<body>
+<link rel="stylesheet" href="app.css"/>
+
+<div style="margin: 25px">
+    <div style="width: 90%; float: left"><input type="text" id="variable-selector"></div>
+    <div style="width: 9%; float: right; right: 0px; position: absolute">
+        <button class="btn btn-default" type="submit" id="settings-button">Settings</button>
+    </div>
+</div>
+
+
+<div id="container" style="height: auto; min-width: 310px"></div>
+
+
+<div class="modal fade" id="settings-modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h2 class="modal-title">Adjust chart settings</h2>
+            </div>
+            <div class="modal-body">
+                <div id="jsoneditor" style="height: 500px"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="save-settings">Save changes</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<script src="page.js"></script>
+</body>
+</html>
