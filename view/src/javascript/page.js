@@ -13,6 +13,16 @@ if (window.counter == undefined) {
     window.counter++;
 }
 
+var series = [
+    {data: [1, 2, 4, 9], name: "temperature 1", display: true},
+    {data: [9, 4, 2, 1], name: "temperature 2", display: true}
+];
+//replace-series
+var options = {};
+//replace-options
+var useHighStock = false;
+//replace-highstock
+
 //Create different containers for the charts
 var chartContainer = document.getElementById("container");
 chartContainer.id = "chart" + window.counter.toString();
@@ -39,7 +49,7 @@ var editor = new JSONEditor(editorContainer);
 
 button.on('click', showModal);
 
-save.on('click', function() {
+save.on('click', function () {
     var newOptions = editor.get();
     //Prevent export from breaking
     delete newOptions.exporting;
@@ -50,13 +60,6 @@ save.on('click', function() {
 function showModal() {
     modal.modal('show');
 }
-
-var series = [
-    {data: [1, 2, 4, 9], name: "temperature 1", display: true},
-    {data: [9, 4, 2, 1], name: "temperature 2", display:true}
-];
-var options = {};
-var useHighStock = false;
 
 //Choose a chart type
 var ChartType = useHighStock ? Highcharts.StockChart : Highcharts.Chart;
@@ -125,7 +128,7 @@ function setOptions(options) {
 }
 
 function findSeries(series, key) {
-    return _.findIndex(series, function(obj) {
+    return _.findIndex(series, function (obj) {
         return obj.name == key;
     })
 }
