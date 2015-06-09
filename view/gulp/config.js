@@ -46,9 +46,9 @@ module.exports = {
             {
                 entries: src + '/javascript/page.js',
                 dest: dest,
-                outputName: 'page.js'
+                outputName: 'page.js',
                 // list of externally available modules to exclude from the bundle
-                //external: ['jquery', 'underscore']
+                external: ['jquery']
             }
         ]
     },

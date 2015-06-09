@@ -1,6 +1,6 @@
-// Browserify entry point for the page.js bundle (yay JavaScript!)
+
 var $ = jQuery = require('jquery');
-var JSONEditor = require('JSONEditor');
+var JSONEditor = require('jsoneditor');
 var _ = require('underscore');
 var Highcharts = require('highstock-browserify');
 var selectize = require('selectize');
