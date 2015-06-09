@@ -1,10 +1,10 @@
 // Browserify entry point for the page.js bundle (yay JavaScript!)
 var $ = jQuery = require('jquery');
+var JSONEditor = require('JSONEditor');
 var _ = require('underscore');
 var Highcharts = require('highstock-browserify');
 var selectize = require('selectize');
 var bootstrap = require('bootstrap');
-var JSONEditor = require('JSONEditor');
 
 //Count the number of charts on the page
 if (window.counter == undefined) {
