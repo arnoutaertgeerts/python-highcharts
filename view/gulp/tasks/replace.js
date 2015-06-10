@@ -3,11 +3,20 @@ var config    = require('../config').production;
 var size      = require('gulp-filesize');
 var replace   = require('gulp-replace');
 
-gulp.task('replace', ['browserify'], function() {
+gulp.task('replace-pre', ['browserify'], function() {
     return gulp.src(config.jsSrc)
         .pipe(replace('//replace-series', "var series = '$#series'"))
         .pipe(replace('//replace-options', "var options = '$#options'"))
         .pipe(replace('//replace-highstock', "var useHighStock = '$#highstock'"))
+        .pipe(gulp.dest(config.dest))
+        .pipe(size());
+});
+
+gulp.task('replace-post', ['inline'], function() {
+    return gulp.src(config.htmlSrc)
+        .pipe(replace("'$#series'", "$#series"))
+        .pipe(replace("'$#options'", "$#options"))
+        .pipe(replace("'$#highstock'", "$#highstock"))
         .pipe(gulp.dest(config.dest))
         .pipe(size());
 });

@@ -1,91 +1,204 @@
-<!-- External plugins -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.17/require.min.js"></script>
-<script src="http://code.jquery.com/jquery-2.1.4.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+<style>body{-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased;color:#555;font-family:sans-serif}
+small{font-weight:400;display:block;font-size:14px}
+code{background-color:#d3d3d3;border-radius:3px;font-family:monospace;padding:0 .5em}
+.icon.-facebook:before,.icon.-linkedin:before,.icon.-pinterest:before,.icon.-twitter:before{-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased;font-family:Post-Creator-Icons;font-style:normal;font-variant:normal;font-weight:400;line-height:1;speak:none;text-transform:none}
+@font-face{font-family:Post-Creator-Icons;src:url(fonts/Post-Creator-Icons.eot);src:url(fonts/Post-Creator-Icons.eot?#iefix) format('embedded-opentype'),url(fonts/Post-Creator-Icons.woff) format('woff'),url(fonts/Post-Creator-Icons.ttf) format('truetype'),url(fonts/Post-Creator-Icons.svg#Post-Creator-Icons) format('svg');font-weight:400;font-style:normal}
+.icon.-facebook:before{content:"\e001"}
+.icon.-linkedin:before{content:"\e002"}
+.icon.-pinterest:before{content:"\e003"}
+.icon.-twitter:before{content:"\e004"}
+.social-icons h4{display:inline-block;margin:20px 10px 0 0}
+.social-icons .icon{display:inline-block;margin:0 5px}
+body.modal-open{overflow:hidden}</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.default.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/4.2.0/jsoneditor.min.css"/>
 
-<script type="text/javascript">
-    requirejs.config({
-        paths: {
-            'highstock': "http://code.highcharts.com/stock/highstock",
-            'standalone': "http://code.highcharts.com/adapters/standalone-framework",
-            'export': "http://code.highcharts.com/stock/modules/exporting",
+<div style="margin: 25px">
+    <div style="width: 90%; float: left"><input type="text" id="variable-selector"></div>
+    <div style="width: 9%; float: right; right: 0px; position: absolute">
+        <button class="btn btn-default" type="submit" id="settings-button">Settings</button>
+    </div>
+</div>
 
-            'underscore': "https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min"
-        },
 
-        shim: {
-            'highstock': {
-                deps: ['standalone'],
-                exports: 'Highcharts'
-            },
-            'export': {
-                deps: ['highstock']
-            },
-            'underscore': {
-                exports: '_'
+<div id="container" style="height: auto; min-width: 310px"></div>
+
+
+<div class="modal fade" id="settings-modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h2 class="modal-title">Adjust chart settings</h2>
+            </div>
+            <div class="modal-body">
+                <div id="jsoneditor" style="height: 500px"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="save-settings">Save changes</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.18/require.min.js"></script>
+<script>(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+/**
+ * Created by arnout on 10.06.15.
+ */
+
+//findIndex polyfill
+if (!Array.prototype.findIndex) {
+    Array.prototype.findIndex = function(predicate) {
+        if (this == null) {
+            throw new TypeError('Array.prototype.findIndex called on null or undefined');
+        }
+        if (typeof predicate !== 'function') {
+            throw new TypeError('predicate must be a function');
+        }
+        var list = Object(this);
+        var length = list.length >>> 0;
+        var thisArg = arguments[1];
+        var value;
+
+        for (var i = 0; i < length; i++) {
+            value = list[i];
+            if (predicate.call(thisArg, value, i, list)) {
+                return i;
             }
         }
-    });
+        return -1;
+    };
+}
+
+},{}]},{},[1]);
 </script>
-
-<!-- Stylesheets -->
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.default.min.css"/>
+<script>(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 
 
-<style>
-    .md-chips .md-chip-input-container input:focus {
-        outline: none;
-        border: none;
-        box-shadow: none;
+requirejs.config({
+    "paths": {
+        "highstock": "https://cdnjs.cloudflare.com/ajax/libs/highstock/2.1.5/highstock",
+        "jsoneditor": "https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/4.2.0/jsoneditor.min",
+        "selectize": "https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.min",
+        "jquery": "https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min"
     }
+});
 
-    md-input-container .md-input:focus {
-        box-shadow: none;
-    }
+//Define jquery here to use the pre-loaded version
+define('jquery', [], function() {
+    return jQuery;
+});
 
-    .jsoneditor td.tree, .jsoneditor td, .jsoneditor tr, .jsoneditor table {
-        border: none;
-        margin: 0;
-    }
-</style>
+},{}]},{},[1]);
+</script>
+<script>(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 
+//Count the number of charts on the page
+if (window.counter == undefined) {
+    window.counter = 0;
+} else {
+    window.counter++;
+}
 
-<script type="text/javascript">
-    //inject:js
-    require([
-        'highstock',
-        'underscore',
-        'export'
-    ], function (select) {
+requirejs([
+    'jquery',
+    'selectize',
+    'jsoneditor',
+    'highstock'
+], function($, selectize, JSONEditor) {
 
-        //Count the number of charts on the page
-        if (window.counter == undefined) {
-            window.counter = 0;
-        } else {
-            window.counter++;
-        }
+    console.log('jquery', $.VERSION);
+    console.log('selectize', selectize ? true: false);
+    console.log('jsoneditor', JSONEditor ? true: false);
+    //Global variable
+    console.log('Highcharts', Highcharts.version);
+
+    $(function() {
+
+        var series = [
+            {data: [1, 2, 4, 9], name: "temperature 1", display: true},
+            {data: [9, 4, 2, 1], name: "temperature 2", display: true}
+        ];
+        var series = [{"data": [1, 2, 5, 9, 6, 3, 4, 8], "name": "List data", "display": true}]
+        var options = {};
+        var options = {"chart": {"type": "line"}}
+        var useHighStock = false;
+        var useHighStock = false
 
         //Create different containers for the charts
         var chartContainer = document.getElementById("container");
         chartContainer.id = "chart" + window.counter.toString();
 
-        var input = $("#variable-selector");
-        input.id = "variable-selector" + window.counter.toString();
+        var selector = $("#variable-selector");
+        selector.attr('id', "variable-selector" + window.counter.toString());
 
-        var series = [{"data": [1, 2, 5, 9, 6, 3, 4, 8], "name": "List data", "display": true}];
-        var options = {"chart": {"type": "line"}};
-        var useHighStock = false;
+        var modal = $("#settings-modal");
+        modal.attr('id', "settings-modal" + window.counter.toString());
+
+        var button = $("#settings-button");
+        button.attr('id', "settings-button" + window.counter.toString());
+
+        var exportButton = $("#export-button");
+        exportButton.attr('id', "export-button" + window.counter.toString());
+
+        var save = $("#save-settings");
+        save.attr('id', "save-settings" + window.counter.toString());
+
+        // create the editor
+        var editorContainer = document.getElementById("jsoneditor");
+        editorContainer.id = "jsoneditor" + window.counter.toString();
+        var editor = new JSONEditor(editorContainer);
+
+        button.on('click', showModal);
+
+        save.on('click', function () {
+            var newOptions = editor.get();
+            //Prevent export from breaking
+            delete newOptions.exporting;
+            setOptions(newOptions);
+            modal.modal('hide');
+        });
+
+        function showModal() {
+            modal.modal('show');
+        }
 
         //Choose a chart type
         var ChartType = useHighStock ? Highcharts.StockChart : Highcharts.Chart;
 
+        //Get all the keys
         var keys = [];
+        var initialKeys = [];
         $.each(series, function (index, serie) {
             keys.push({
-                name: serie.name,
-                selected: serie.display
-            })
+                display: serie.display,
+                value: serie.name,
+                text: serie.name
+            });
+
+            if (serie.display) {
+                initialKeys.push(serie.name)
+            }
+        });
+
+        selector.selectize({
+            plugins: ['remove_button', 'restore_on_backspace'],
+            delimiter: ',',
+            options: keys,
+            items: initialKeys,
+            onItemAdd: function (key) {
+                console.log('series added');
+                addSeries(key);
+                newChart(chart.options, renderedSeries);
+            },
+            onItemRemove: function (key) {
+                console.log('series removed');
+                deleteSeries(key);
+                newChart(chart.options, renderedSeries);
+            }
         });
 
         //Set initial chart options
@@ -96,79 +209,33 @@
             chartOptions = $.extend(options["chart"], {renderTo: chartContainer.id});
         }
 
-        //Initial rendered series
-        var renderedSeries = [];
-        options = $.extend(options, {chart: chartOptions}, {series: renderedSeries});
-        var chart = new ChartType(options);
-
         //Default highchart colors
         var colors = {};
         colors.available = ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9',
             '#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1'];
         colors.used = [];
 
+        //Initial rendered series
+        var renderedSeries = [];
+        options = $.extend(options, {chart: chartOptions}, {series: renderedSeries});
+        var chart = new ChartType(options);
 
-        input.selectize({
-            plugins: ['remove_button'],
-            delimiter: ',',
-            persist: false
+        $.each(initialKeys, function (index, key) {
+            addSeries(key);
         });
 
-        //Show first series
-        $scope.selected.keys = _.filter(series,function (obj) {
-            return obj.display == true || obj.display === true
-        }).map(function (serie) {
-            return {
-                name: serie.name,
-                selected: true
-            }
-        });
-
-        updateSeries($scope.selected.keys, []);
+        newChart(chart.options, renderedSeries);
+        editor.set(chart.options);
+        exportButton.on('click', chart.exportChart);
 
         function setOptions(options) {
-            newChart($.extend(chart.options, options), renderedSeries);
-        }
-
-        // Update the series
-        function updateSeries(newValue, oldValue) {
-            newValue = newValue.map(function (element) {
-                return element.name
-            });
-
-            oldValue = oldValue.map(function (element) {
-                return element.name
-            });
-
-            if (newValue.length > oldValue.length) {
-                var newKeys = _.difference(newValue, oldValue);
-                $.each(newKeys, function (i, newKey) {
-                    var index = findSeries(series, newKey);
-                    var newSeries = series[index];
-                    addSeries(newSeries);
-                });
-                newChart(chart.options, renderedSeries);
-
-            } else if (newValue.length < oldValue.length) {
-                var removedKeys = _.difference(oldValue, newValue);
-                $.each(removedKeys, function (i, removedKey) {
-                    deleteSeries(removedKey);
-                });
-
-                newChart(chart.options, renderedSeries)
-            }
+            newChart(options, renderedSeries);
         }
 
         function findSeries(series, key) {
-            var index = {};
-
-            var arrayLength = series.length;
-            for (var i = 0; i < arrayLength; i++) {
-                if (series[i].name == key) {
-                    index = i
-                }
-            }
-            return index
+            return series.findIndex(function (obj) {
+                return obj.name == key;
+            })
         }
 
         function newChart(options, series) {
@@ -190,21 +257,25 @@
             chart.redraw();
         }
 
-        function addSeries(newSeries) {
+        function addSeries(key) {
+            var index = findSeries(series, key);
+            var newSeries = series[index];
             renderedSeries.push($.extend(newSeries, {color: colors.available[0]}));
             colors.used.push(colors.available.splice(0, 1)[0]);
         }
 
-        function deleteSeries(name) {
-            var index = findSeries(renderedSeries, name);
+        function deleteSeries(key) {
+            var index = findSeries(renderedSeries, key);
             var deletedColor = renderedSeries.splice(index, 1).color;
             var colorIndex = colors.used.indexOf(deletedColor);
             colors.available.push(colors.used.splice(colorIndex, 1)[0]);
         }
-    })
 
+        console.log('loaded!', Date());
+
+    });
+});
+
+},{}]},{},[1]);
 </script>
 
-
-<input type="text" id="variable-selector">
-<div id="container" style="height: 400px; min-width: 310px"></div>

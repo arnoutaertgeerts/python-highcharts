@@ -1,15 +1,11 @@
 var gulp      = require('gulp');
 var config    = require('../config').production;
-var inline = require('gulp-inline-source');
 var size      = require('gulp-filesize');
+var replace   = require('gulp-html-replace');
 
-gulp.task('inline', ['markup', 'images', 'iconFont', 'minifyCss', 'replace-pre'], function() {
-    var options = {
-        'compress' : false
-    };
-
+gulp.task('removedep', ['replace-post'], function() {
     return gulp.src(config.htmlSrc)
-        .pipe(inline(options))
+        .pipe(replace({bootstrap: ''}))
         .pipe(gulp.dest(config.dest))
         .pipe(size());
 });
