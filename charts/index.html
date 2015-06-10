@@ -1,4 +1,16 @@
-<link rel="stylesheet" href="app.css" inline/>
+<style>body{-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased;color:#555;font-family:sans-serif}
+small{font-weight:400;display:block;font-size:14px}
+code{background-color:#d3d3d3;border-radius:3px;font-family:monospace;padding:0 .5em}
+.icon.-facebook:before,.icon.-linkedin:before,.icon.-pinterest:before,.icon.-twitter:before{-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased;font-family:Post-Creator-Icons;font-style:normal;font-variant:normal;font-weight:400;line-height:1;speak:none;text-transform:none}
+@font-face{font-family:Post-Creator-Icons;src:url(fonts/Post-Creator-Icons.eot);src:url(fonts/Post-Creator-Icons.eot?#iefix) format('embedded-opentype'),url(fonts/Post-Creator-Icons.woff) format('woff'),url(fonts/Post-Creator-Icons.ttf) format('truetype'),url(fonts/Post-Creator-Icons.svg#Post-Creator-Icons) format('svg');font-weight:400;font-style:normal}
+.icon.-facebook:before{content:"\e001"}
+.icon.-linkedin:before{content:"\e002"}
+.icon.-pinterest:before{content:"\e003"}
+.icon.-twitter:before{content:"\e004"}
+.social-icons h4{display:inline-block;margin:20px 10px 0 0}
+.social-icons .icon{display:inline-block;margin:0 5px}
+body.modal-open{overflow:hidden}
+.jsoneditor table,.jsoneditor td,.jsoneditor td.tree,.jsoneditor tr{border:none;margin:0}</style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.default.min.css"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/4.2.0/jsoneditor.min.css"/>
 
@@ -31,7 +43,7 @@
     </div>
 
     <div class="row">
-        <div id="chart" style=" min-width: 310px"></div>
+        <div id="chart-container" style=" min-width: 310px"></div>
     </div>
 </div>
 
@@ -40,13 +52,263 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.18/require.min.js"></script>
 
 
-<!-- build:bootstrap -->
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css"/>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
-<!-- endbuild -->
 
 
-<script src="lib.js" inline></script>
-<script src="require.js" inline></script>
-<script src="page.js" inline></script>
+
+<script>(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+/**
+ * Created by arnout on 10.06.15.
+ */
+
+//findIndex polyfill
+if (!Array.prototype.findIndex) {
+    Array.prototype.findIndex = function(predicate) {
+        if (this == null) {
+            throw new TypeError('Array.prototype.findIndex called on null or undefined');
+        }
+        if (typeof predicate !== 'function') {
+            throw new TypeError('predicate must be a function');
+        }
+        var list = Object(this);
+        var length = list.length >>> 0;
+        var thisArg = arguments[1];
+        var value;
+
+        for (var i = 0; i < length; i++) {
+            value = list[i];
+            if (predicate.call(thisArg, value, i, list)) {
+                return i;
+            }
+        }
+        return -1;
+    };
+}
+
+function guid() {
+    function s4() {
+        return Math.floor((1 + Math.random()) * 0x10000)
+            .toString(16)
+            .substring(1);
+    }
+    return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+        s4() + '-' + s4() + s4() + s4();
+}
+
+},{}]},{},[1]);
+</script>
+<script>(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+
+
+requirejs.config({
+    "paths": {
+        "highstock": "https://cdnjs.cloudflare.com/ajax/libs/highstock/2.1.5/highstock",
+        "export": "https://cdnjs.cloudflare.com/ajax/libs/highstock/2.1.5/modules/exporting",
+        "jsoneditor": "https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/4.2.0/jsoneditor.min",
+        "selectize": "https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.min",
+        "jquery": "https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min"
+    }
+});
+
+//Define jquery here to use the pre-loaded version
+define('jquery', [], function() {
+    return jQuery;
+});
+
+},{}]},{},[1]);
+</script>
+<script>(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+
+//Count the number of charts on the page
+if (window.counter == undefined) {
+    window.counter = 0;
+} else {
+    window.counter++;
+}
+
+requirejs([
+    'jquery',
+    'selectize',
+    'jsoneditor',
+    'highstock',
+    'export'
+], function($, selectize, JSONEditor) {
+
+    function guid() {
+        function s4() {
+            return Math.floor((1 + Math.random()) * 0x10000)
+                .toString(16)
+                .substring(1);
+        }
+        return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+            s4() + '-' + s4() + s4() + s4();
+    }
+
+    var id = guid();
+    plot(id);
+
+    function plot(id) {
+        var series = [
+            {data: [1, 2, 4, 9], name: "temperature 1", display: true, color: '#2b908f'},
+            {data: [9, 4, 2, 1], name: "temperature 2", display: true},
+            {data: [0, 3, 5, 6], name: "temperature 3", display: false}
+        ];
+        var series = $#series
+        var options = {};
+        var options = $#options
+        var useHighStock = false;
+        var useHighStock = $#highstock
+
+        //Create different containers for the charts
+        var chartContainer = document.getElementById("chart-container");
+        chartContainer.id = "chart-container" + id;
+
+        var selector = $("#variable-selector");
+        selector.attr('id', "variable-selector" + id);
+
+        var settings = $("#settings-collapse");
+        settings.attr('id', "settings-collapse" + id);
+
+        var button = $("#settings-button");
+        button.attr('id', "settings-button" + id);
+
+        var exportButton = $("#export-button");
+        exportButton.attr('id', "export-button" + id);
+
+        var save = $("#save-settings");
+        save.attr('id', "save-settings" + id);
+
+        // create the editor
+        var editorContainer = document.getElementById("jsoneditor");
+        editorContainer.id = "jsoneditor" + id;
+        var editor = new JSONEditor(editorContainer);
+
+        button.on('click', showSettings);
+
+        save.on('click', function () {
+            var newOptions = editor.get();
+            //Prevent export from breaking
+            delete newOptions.exporting;
+            setOptions(newOptions);
+            settings.collapse('hide');
+        });
+
+        function showSettings() {
+            settings.collapse('toggle');
+        }
+
+        //Choose a chart type
+        var ChartType = useHighStock ? Highcharts.StockChart : Highcharts.Chart;
+
+        //Default highchart colors
+        var colors = ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9',
+            '#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1'];
+
+        series.map(function (serie, index) {
+            if (!serie.color) {
+                serie['color'] = colors[index % 10];
+            }
+
+            return serie;
+        });
+
+        //Get all the keys
+        var keys = [];
+        var initialKeys = [];
+        $.each(series, function (index, serie) {
+            keys.push({
+                display: serie.display,
+                value: serie.name,
+                text: serie.name
+            });
+
+            if (serie.display) {
+                initialKeys.push(serie.name)
+            }
+        });
+
+        selector.selectize({
+            plugins: ['remove_button', 'restore_on_backspace'],
+            delimiter: ',',
+            options: keys,
+            items: initialKeys,
+            onItemAdd: function (key) {
+                console.log('series added');
+                addSeries(key);
+                newChart(chart.options, renderedSeries);
+            },
+            onItemRemove: function (key) {
+                console.log('series removed');
+                deleteSeries(key);
+                newChart(chart.options, renderedSeries);
+            }
+        });
+
+        //Set initial chart options
+        var chartOptions;
+        if (typeof options.chart === "undefined") {
+            chartOptions = {renderTo: chartContainer.id};
+        } else {
+            chartOptions = $.extend(options["chart"], {renderTo: chartContainer.id});
+        }
+
+        //Initial rendered series
+        var renderedSeries = [];
+        options = $.extend(options, {chart: chartOptions}, {series: renderedSeries});
+        var chart = new ChartType(options);
+
+        $.each(initialKeys, function (index, key) {
+            addSeries(key);
+        });
+
+        newChart(chart.options, renderedSeries);
+        editor.set(chart.options);
+        exportButton.on('click', chart.exportChart);
+
+        function setOptions(options) {
+            newChart(options, renderedSeries);
+        }
+
+        function findSeries(series, key) {
+            return series.findIndex(function (obj) {
+                return obj.name == key;
+            })
+        }
+
+        function newChart(options, series) {
+            //Disable animation
+            var newOptions = $.extend(options, {series: series});
+            newOptions.plotOptions['series'] = {animation: false};
+
+            //Get zoom
+            var xExtremes = chart.xAxis[0].getExtremes();
+
+            //Re-plot the chart
+            chart.destroy();
+            chart = new ChartType(newOptions);
+
+            //Reset the zoom
+            chart.xAxis[0].setExtremes(xExtremes.min, xExtremes.max, false, false);
+
+            //Re-draw chart
+            chart.redraw();
+        }
+
+        function addSeries(key) {
+            var index = findSeries(series, key);
+            var newSeries = series[index];
+            renderedSeries.push(newSeries)
+        }
+
+        function deleteSeries(key) {
+            var index = findSeries(renderedSeries, key);
+            renderedSeries.splice(index, 1)
+        }
+
+        console.log('loaded!', Date());
+    }
+
+});
+
+},{}]},{},[1]);
+</script>
 
