@@ -149,7 +149,9 @@ def plotasync(
             options=json.dumps(options),
             highstock=json.dumps(stock),
             height=str(height) + "px",
-            live=json.dumps(live)
+            live=json.dumps(live),
+            url=json.dumps(address),
+            save=json.dumps(False)
         )
 
         inline = MyTemplate(read).substitute(
@@ -157,7 +159,9 @@ def plotasync(
             options=json.dumps(options),
             highstock=json.dumps(stock),
             height=str(height) + "px",
-            live=json.dumps(live)
+            live=json.dumps(live),
+            url=json.dumps(address),
+            save=json.dumps(False)
         )
 
     html_path = os.path.join(save, 'index.html')

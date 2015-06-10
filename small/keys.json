@@ -1,1 +1,11 @@
-["AAPL", "MSFT", "OHLC"]
+[{
+    "name": "AAPL",
+    "display": true
+}, {
+    "name": "MSFT",
+    "display": true
+}, {
+    "name": "OHLC",
+    "display": false
+}
+]

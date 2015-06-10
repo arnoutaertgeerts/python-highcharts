@@ -1,4 +1,5 @@
 var dest = "../charts";
+//var dest = "./build";
 var src = './src';
 
 module.exports = {
@@ -47,6 +48,13 @@ module.exports = {
                 entries: src + '/javascript/page.js',
                 dest: dest,
                 outputName: 'page.js'
+                // list of externally available modules to exclude from the bundle
+                //external: ['jquery']
+            },
+            {
+                entries: src + '/javascript/async.js',
+                dest: dest,
+                outputName: 'async.js'
                 // list of externally available modules to exclude from the bundle
                 //external: ['jquery']
             },

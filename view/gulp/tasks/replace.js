@@ -10,6 +10,7 @@ gulp.task('replace-pre', ['browserify'], function() {
         .pipe(replace('//replace-save', "var save = '$#save'"))
         .pipe(replace('//replace-url', "var url = '$#url'"))
         .pipe(replace('//replace-highstock', "var useHighStock = '$#highstock'"))
+        .pipe(replace('//replace-path', "var path = '$#path'"))
         .pipe(gulp.dest(config.dest))
         .pipe(size());
 });
@@ -21,6 +22,7 @@ gulp.task('replace-post', ['inline'], function() {
         .pipe(replace("'$#highstock'", "$#highstock"))
         .pipe(replace("'$#save'", "$#save"))
         .pipe(replace("'$#url'", "$#url"))
+        .pipe(replace("'$#path'", "$#path"))
         .pipe(gulp.dest(config.dest))
         .pipe(size());
 });

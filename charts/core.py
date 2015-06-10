@@ -52,7 +52,7 @@ def to_json_files(series, path):
 
     for s in series:
         if s["name"] not in map(lambda x: x["name"], keys):
-            keys.append(dict(name=s["name"], display=s["display"]))
+            keys.append(dict(name=s["name"], display=s["display"], value=s["name"], text=s["name"]))
             with open(os.path.join(path, s["name"] + ".json"), "w") as json_file:
                 json_file.write(json.dumps(s, cls=ChartsJSONEncoder))
         else:

@@ -1,3 +1,4 @@
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 
 requirejs([
     'jquery',
@@ -22,15 +23,15 @@ requirejs([
 
     function plot(id) {
         var options = {};
-        //replace-options
+        var options = '$#options'
         var useHighStock = true;
-        //replace-highstock
+        var useHighStock = '$#highstock'
         var save = 'app/chart.svg';
-        //replace-save
+        var save = '$#save'
         var url = 'http://127.0.0.1:37759';
-        //replace-url
+        var url = '$#url'
         var path = 'small';
-        //replace-path
+        var path = '$#path'
 
         //Create different containers for the charts
         var chartContainer = document.getElementById("chart-container");
@@ -216,3 +217,5 @@ requirejs([
         }
     }
 });
+
+},{}]},{},[1]);
