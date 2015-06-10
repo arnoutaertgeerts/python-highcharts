@@ -166,6 +166,6 @@ def plotasync(
 
     html_path = os.path.join(save, 'index.html')
     with open(html_path, "w") as html_file:
-        html_file.write(html)
+        html_file.write(html + TABDEPS)
 
     return Chart(inline, html_path, save, show)

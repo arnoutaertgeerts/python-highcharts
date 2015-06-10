@@ -50,5 +50,5 @@ def run_server():
 address = run_server()
 
 
-def url():
-    return address
+def url(path):
+    return address + path
