@@ -171,9 +171,6 @@ requirejs([
         var button = $("#settings-button");
         button.attr('id', "settings-button" + id);
 
-        var exportButton = $("#export-button");
-        exportButton.attr('id', "export-button" + id);
-
         var save = $("#save-settings");
         save.attr('id', "save-settings" + id);
 
@@ -262,7 +259,6 @@ requirejs([
 
         newChart(chart.options, renderedSeries);
         editor.set(chart.options);
-        exportButton.on('click', chart.exportChart);
 
         function setOptions(options) {
             newChart(options, renderedSeries);
@@ -291,6 +287,7 @@ requirejs([
 
             //Re-draw chart
             chart.redraw();
+            var svg = chart.getSVG();
         }
 
         function addSeries(key) {

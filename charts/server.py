@@ -11,6 +11,13 @@ class ChartRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         SimpleHTTPServer.SimpleHTTPRequestHandler.__init__(self, request, client_address, server)
         return
 
+    def do_POST(self):
+        content_len = int(self.headers.getheader('content-length', 0))
+        post_body = self.rfile.read(content_len)
+
+        with open('log.txt', 'w') as log:
+            log.write(post_body)
+
     def log_message(self, format, *args):
         pass
 
@@ -22,7 +29,7 @@ class ChartServer(SocketServer.TCPServer):
         return
 
 
-def run_server(path='.'):
+def run_server():
     import threading
 
     address = ('localhost', 0)  # let the kernel give us a port
@@ -35,11 +42,11 @@ def run_server(path='.'):
     t.setDaemon(True)  # don't hang on exit
     t.start()
 
-    return 'http://{0}:{1}/{2}/'.format(ip, port, path)
+    return 'http://{0}:{1}/'.format(ip, port)
 
 
 address = run_server()
 
 
-def url(path):
-    return address + path
+def url():
+    return address
