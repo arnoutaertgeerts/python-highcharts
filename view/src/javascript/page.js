@@ -21,8 +21,9 @@ requirejs([
     console.log('Highcharts', Highcharts.version);
 
     var series = [
-        {data: [1, 2, 4, 9], name: "temperature 1", display: true},
-        {data: [9, 4, 2, 1], name: "temperature 2", display: true}
+        {data: [1, 2, 4, 9], name: "temperature 1", display: true, color:'#2b908f'},
+        {data: [9, 4, 2, 1], name: "temperature 2", display: true},
+        {data: [0, 3, 5, 6], name: "temperature 3", display: false}
     ];
     //replace-series
     var options = {};
@@ -71,6 +72,18 @@ requirejs([
     //Choose a chart type
     var ChartType = useHighStock ? Highcharts.StockChart : Highcharts.Chart;
 
+    //Default highchart colors
+    var colors = ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9',
+        '#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1'];
+
+    series.map(function(serie, index) {
+        if (!serie.color) {
+            serie['color'] = colors[index % 10];
+        }
+
+        return serie;
+    });
+
     //Get all the keys
     var keys = [];
     var initialKeys = [];
@@ -110,12 +123,6 @@ requirejs([
     } else {
         chartOptions = $.extend(options["chart"], {renderTo: chartContainer.id});
     }
-
-    //Default highchart colors
-    var colors = {};
-    colors.available = ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9',
-        '#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1'];
-    colors.used = [];
 
     //Initial rendered series
     var renderedSeries = [];
@@ -162,15 +169,12 @@ requirejs([
     function addSeries(key) {
         var index = findSeries(series, key);
         var newSeries = series[index];
-        renderedSeries.push($.extend(newSeries, {color: colors.available[0]}));
-        colors.used.push(colors.available.splice(0, 1)[0]);
+        renderedSeries.push(newSeries)
     }
 
     function deleteSeries(key) {
         var index = findSeries(renderedSeries, key);
-        var deletedColor = renderedSeries.splice(index, 1).color;
-        var colorIndex = colors.used.indexOf(deletedColor);
-        colors.available.push(colors.used.splice(colorIndex, 1)[0]);
+        renderedSeries.splice(index, 1)
     }
 
     console.log('loaded!', Date());

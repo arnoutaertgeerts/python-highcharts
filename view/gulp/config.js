@@ -1,4 +1,4 @@
-var dest = "./build";
+var dest = "../charts";
 var src = './src';
 
 module.exports = {
