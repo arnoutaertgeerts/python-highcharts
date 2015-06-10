@@ -56,10 +56,6 @@ body.modal-open{overflow:hidden}
 
 
 <script>(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-/**
- * Created by arnout on 10.06.15.
- */
-
 //findIndex polyfill
 if (!Array.prototype.findIndex) {
     Array.prototype.findIndex = function(predicate) {
@@ -94,6 +90,30 @@ function guid() {
         s4() + '-' + s4() + s4() + s4();
 }
 
+Array.prototype.equals = function (array) {
+    // if the other array is a false value, return
+    if (!array)
+        return false;
+
+    // compare lengths - can save a lot of time
+    if (this.length != array.length)
+        return false;
+
+    for (var i = 0, l = this.length; i < l; i++) {
+        // Check if we have nested arrays
+        if (this[i] instanceof Array && array[i] instanceof Array) {
+            // recurse into the nested arrays
+            if (!this[i].equals(array[i]))
+                return false;
+        }
+        else if (this[i] != array[i]) {
+            // Warning - two different object instances will never be equal: {x:20} != {x:20}
+            return false;
+        }
+    }
+    return true;
+};
+
 },{}]},{},[1]);
 </script>
 <script>(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
@@ -106,6 +126,9 @@ requirejs.config({
         "jsoneditor": "https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/4.2.0/jsoneditor.min",
         "selectize": "https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.min",
         "jquery": "https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min"
+    },
+    "shim": {
+        "export": ["highstock"]
     }
 });
 
@@ -157,6 +180,10 @@ requirejs([
         var options = $#options
         var useHighStock = false;
         var useHighStock = $#highstock
+        var save = 'app/chart.svg';
+        var save = $#save
+        var url = 'http://127.0.0.1:37759';
+        var url = $#url
 
         //Create different containers for the charts
         var chartContainer = document.getElementById("chart-container");
@@ -171,8 +198,8 @@ requirejs([
         var button = $("#settings-button");
         button.attr('id', "settings-button" + id);
 
-        var save = $("#save-settings");
-        save.attr('id', "save-settings" + id);
+        var saveButton = $("#save-settings");
+        saveButton.attr('id', "save-settings" + id);
 
         // create the editor
         var editorContainer = document.getElementById("jsoneditor");
@@ -181,7 +208,7 @@ requirejs([
 
         button.on('click', showSettings);
 
-        save.on('click', function () {
+        saveButton.on('click', function () {
             var newOptions = editor.get();
             //Prevent export from breaking
             delete newOptions.exporting;
@@ -260,6 +287,10 @@ requirejs([
         newChart(chart.options, renderedSeries);
         editor.set(chart.options);
 
+        if (save) {
+            saveSVG(url, save)
+        }
+
         function setOptions(options) {
             newChart(options, renderedSeries);
         }
@@ -287,7 +318,6 @@ requirejs([
 
             //Re-draw chart
             chart.redraw();
-            var svg = chart.getSVG();
         }
 
         function addSeries(key) {
@@ -299,6 +329,17 @@ requirejs([
         function deleteSeries(key) {
             var index = findSeries(renderedSeries, key);
             renderedSeries.splice(index, 1)
+        }
+
+        function saveSVG(url, name) {
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: JSON.stringify({
+                    svg: chart.getSVG(),
+                    name: name
+                })
+            });
         }
 
         console.log('loaded!', Date());

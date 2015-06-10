@@ -3,7 +3,7 @@ __author__ = 'Arnout Aertgeerts'
 import SimpleHTTPServer
 import SocketServer
 import os
-
+import json
 
 class ChartRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
@@ -13,10 +13,12 @@ class ChartRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
     def do_POST(self):
         content_len = int(self.headers.getheader('content-length', 0))
-        post_body = self.rfile.read(content_len)
+        body = json.loads(self.rfile.read(content_len))
 
-        with open('log.txt', 'w') as log:
-            log.write(post_body)
+        with open(body['name'], 'w') as chart_file:
+            chart_file.write(body['svg'])
+
+        SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
 
     def log_message(self, format, *args):
         pass

@@ -15,10 +15,10 @@ class MyTemplate(Template):
     idpattern = r'[a-z][_a-z0-9]*'
 
 
-def show_plot(inline, html, show, async=False):
+def show_plot(html, saveHTML, show, async=False):
     if show == 'inline':
         from IPython.display import HTML
-        return HTML(inline)
+        return HTML(html)
 
     elif show == 'tab':
         print 'Opening new tab...'
@@ -26,7 +26,7 @@ def show_plot(inline, html, show, async=False):
             address = url(async)
             webbrowser.open_new_tab(address)
         else:
-            webbrowser.open_new_tab('file://' + os.path.realpath(html))
+            webbrowser.open_new_tab('file://' + os.path.realpath(saveHTML))
 
     elif show == 'window':
         print 'Trying to open a window. If this fails we will open a tab...'
@@ -34,7 +34,7 @@ def show_plot(inline, html, show, async=False):
             address = url(async)
             webbrowser.open_new(address)
         else:
-            webbrowser.open_new('file://' + os.path.realpath(html))
+            webbrowser.open_new('file://' + os.path.realpath(saveHTML))
 
 
 def clean_dir(path):

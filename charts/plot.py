@@ -65,25 +65,38 @@ def plot(
     # Set the display option
     series = set_display(series, display)
 
+    # Get the save extension
+    if save:
+        extension = os.path.splitext(save)[1]
+    else:
+        extension = False
+
+    saveSVG = False
+    saveHTML = False
+
+    if extension == '.svg':
+        saveSVG = save
+    if show != 'inline':
+        saveHTML = 'index.html'
+    if extension == '.html':
+        saveHTML = save
+
     with open(os.path.join(package_directory, "index.html"), "r") as html:
-        inline = MyTemplate(html.read()).substitute(
+        html = MyTemplate(html.read()).substitute(
             path=package_directory,
             series=json.dumps(series, cls=ChartsJSONEncoder),
             options=json.dumps(options),
             highstock=json.dumps(stock),
-            height=str(height) + "px"
+            height=str(height) + "px",
+            url=json.dumps(address),
+            save=json.dumps(saveSVG)
         )
 
-    if save:
-        with open(save, "w") as text_file:
-            text_file.write(inline + TABDEPS)
-    else:
-        if show != 'inline':
-            save = 'index.html'
-            with open(save, "w") as text_file:
-                text_file.write(inline + TABDEPS)
+    if saveHTML:
+        with open(saveHTML, "w") as text_file:
+            text_file.write(html + TABDEPS)
 
-    return show_plot(inline, save, show)
+    return show_plot(html, saveHTML, show)
 
 
 def plotasync(

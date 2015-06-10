@@ -39,6 +39,10 @@ requirejs([
         var options = '$#options'
         var useHighStock = false;
         var useHighStock = '$#highstock'
+        var save = 'app/chart.svg';
+        var save = '$#save'
+        var url = 'http://127.0.0.1:37759';
+        var url = '$#url'
 
         //Create different containers for the charts
         var chartContainer = document.getElementById("chart-container");
@@ -53,8 +57,8 @@ requirejs([
         var button = $("#settings-button");
         button.attr('id', "settings-button" + id);
 
-        var save = $("#save-settings");
-        save.attr('id', "save-settings" + id);
+        var saveButton = $("#save-settings");
+        saveButton.attr('id', "save-settings" + id);
 
         // create the editor
         var editorContainer = document.getElementById("jsoneditor");
@@ -63,7 +67,7 @@ requirejs([
 
         button.on('click', showSettings);
 
-        save.on('click', function () {
+        saveButton.on('click', function () {
             var newOptions = editor.get();
             //Prevent export from breaking
             delete newOptions.exporting;
@@ -142,6 +146,10 @@ requirejs([
         newChart(chart.options, renderedSeries);
         editor.set(chart.options);
 
+        if (save) {
+            saveSVG(url, save)
+        }
+
         function setOptions(options) {
             newChart(options, renderedSeries);
         }
@@ -169,7 +177,6 @@ requirejs([
 
             //Re-draw chart
             chart.redraw();
-            var svg = chart.getSVG();
         }
 
         function addSeries(key) {
@@ -181,6 +188,17 @@ requirejs([
         function deleteSeries(key) {
             var index = findSeries(renderedSeries, key);
             renderedSeries.splice(index, 1)
+        }
+
+        function saveSVG(url, name) {
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: JSON.stringify({
+                    svg: chart.getSVG(),
+                    name: name
+                })
+            });
         }
 
         console.log('loaded!', Date());

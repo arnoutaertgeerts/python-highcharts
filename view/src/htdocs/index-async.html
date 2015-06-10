@@ -1,0 +1,51 @@
+<link rel="stylesheet" href="app.css" inline/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.default.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/4.2.0/jsoneditor.min.css"/>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-10">
+            <input type="text" id="variable-selector">
+        </div>
+        <div class="col-sm-2">
+            <button class="btn btn-default pull-right" type="submit" id="settings-button">Settings</button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="collapse col-xs-12" id="settings-collapse">
+            <div class="panel panel-default" style="margin-top: 20px">
+                <div class="panel-heading"><h3 class="panel-title">Adjust chart settings</h3></div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div id="jsoneditor" class="col-md-12" style="height: 350px"></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <button type="button" class="btn btn-primary" id="save-settings" style="margin-top: 10px">Save changes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div id="chart-container" style=" min-width: 310px"></div>
+    </div>
+</div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.18/require.min.js"></script>
+
+
+<!-- build:bootstrap -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css"/>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<!-- endbuild -->
+
+
+<script src="lib.js" inline></script>
+<script src="require.js" inline></script>
+<script src="async.js"></script>
