@@ -9,6 +9,10 @@ import json
 
 package_directory = os.path.dirname(os.path.abspath(__file__))
 
+TABDEPS = """
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css"/>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+"""
 
 def line(*args, **kwargs):
     return plot(*args, type='line', **kwargs)
@@ -71,12 +75,12 @@ def plot(
 
     if save:
         with open(save, "w") as text_file:
-            text_file.write(inline)
+            text_file.write(inline + TABDEPS)
     else:
         if show != 'inline':
             save = 'index.html'
             with open(save, "w") as text_file:
-                text_file.write(inline)
+                text_file.write(inline + TABDEPS)
 
     return show_plot(inline, save, show)
 

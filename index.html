@@ -9,41 +9,52 @@ code{background-color:#d3d3d3;border-radius:3px;font-family:monospace;padding:0 
 .icon.-twitter:before{content:"\e004"}
 .social-icons h4{display:inline-block;margin:20px 10px 0 0}
 .social-icons .icon{display:inline-block;margin:0 5px}
-body.modal-open{overflow:hidden}</style>
+body.modal-open{overflow:hidden}
+.jsoneditor table,.jsoneditor td,.jsoneditor td.tree,.jsoneditor tr{border:none;margin:0}</style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.default.min.css"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/4.2.0/jsoneditor.min.css"/>
 
-<div style="margin: 25px">
-    <div style="width: 90%; float: left"><input type="text" id="variable-selector"></div>
-    <div style="width: 9%; float: right; right: 0px; position: absolute">
-        <button class="btn btn-default" type="submit" id="settings-button">Settings</button>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-10">
+            <input type="text" id="variable-selector">
+        </div>
+        <div class="col-sm-2">
+            <button class="btn btn-default pull-right" type="submit" id="settings-button">Settings</button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="collapse col-xs-12" id="settings-collapse">
+            <div class="panel panel-default" style="margin-top: 20px">
+                <div class="panel-heading"><h3 class="panel-title">Adjust chart settings</h3></div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div id="jsoneditor" class="col-md-12" style="height: 350px"></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <button type="button" class="btn btn-primary" id="save-settings" style="margin-top: 10px">Save changes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div id="chart-container" style=" min-width: 310px"></div>
     </div>
 </div>
 
 
-<div id="container" style="height: auto; min-width: 310px"></div>
-
-
-<div class="modal fade" id="settings-modal">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h2 class="modal-title">Adjust chart settings</h2>
-            </div>
-            <div class="modal-body">
-                <div id="jsoneditor" style="height: 500px"></div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="save-settings">Save changes</button>
-            </div>
-        </div><!-- /.modal-content -->
-    </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.18/require.min.js"></script>
+
+
+
+
+
 <script>(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 /**
  * Created by arnout on 10.06.15.
@@ -73,6 +84,16 @@ if (!Array.prototype.findIndex) {
     };
 }
 
+function guid() {
+    function s4() {
+        return Math.floor((1 + Math.random()) * 0x10000)
+            .toString(16)
+            .substring(1);
+    }
+    return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+        s4() + '-' + s4() + s4() + s4();
+}
+
 },{}]},{},[1]);
 </script>
 <script>(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
@@ -81,6 +102,7 @@ if (!Array.prototype.findIndex) {
 requirejs.config({
     "paths": {
         "highstock": "https://cdnjs.cloudflare.com/ajax/libs/highstock/2.1.5/highstock",
+        "export": "https://cdnjs.cloudflare.com/ajax/libs/highstock/2.1.5/modules/exporting",
         "jsoneditor": "https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/4.2.0/jsoneditor.min",
         "selectize": "https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.min",
         "jquery": "https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min"
@@ -107,20 +129,28 @@ requirejs([
     'jquery',
     'selectize',
     'jsoneditor',
-    'highstock'
+    'highstock',
+    'export'
 ], function($, selectize, JSONEditor) {
 
-    console.log('jquery', $.VERSION);
-    console.log('selectize', selectize ? true: false);
-    console.log('jsoneditor', JSONEditor ? true: false);
-    //Global variable
-    console.log('Highcharts', Highcharts.version);
+    function guid() {
+        function s4() {
+            return Math.floor((1 + Math.random()) * 0x10000)
+                .toString(16)
+                .substring(1);
+        }
+        return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+            s4() + '-' + s4() + s4() + s4();
+    }
 
-    $(function() {
+    var id = guid();
+    plot(id);
 
+    function plot(id) {
         var series = [
-            {data: [1, 2, 4, 9], name: "temperature 1", display: true},
-            {data: [9, 4, 2, 1], name: "temperature 2", display: true}
+            {data: [1, 2, 4, 9], name: "temperature 1", display: true, color: '#2b908f'},
+            {data: [9, 4, 2, 1], name: "temperature 2", display: true},
+            {data: [0, 3, 5, 6], name: "temperature 3", display: false}
         ];
         var series = [{"data": [1, 2, 5, 9, 6, 3, 4, 8], "name": "List data", "display": true}]
         var options = {};
@@ -129,45 +159,57 @@ requirejs([
         var useHighStock = false
 
         //Create different containers for the charts
-        var chartContainer = document.getElementById("container");
-        chartContainer.id = "chart" + window.counter.toString();
+        var chartContainer = document.getElementById("chart-container");
+        chartContainer.id = "chart-container" + id;
 
         var selector = $("#variable-selector");
-        selector.attr('id', "variable-selector" + window.counter.toString());
+        selector.attr('id', "variable-selector" + id);
 
-        var modal = $("#settings-modal");
-        modal.attr('id', "settings-modal" + window.counter.toString());
+        var settings = $("#settings-collapse");
+        settings.attr('id', "settings-collapse" + id);
 
         var button = $("#settings-button");
-        button.attr('id', "settings-button" + window.counter.toString());
+        button.attr('id', "settings-button" + id);
 
         var exportButton = $("#export-button");
-        exportButton.attr('id', "export-button" + window.counter.toString());
+        exportButton.attr('id', "export-button" + id);
 
         var save = $("#save-settings");
-        save.attr('id', "save-settings" + window.counter.toString());
+        save.attr('id', "save-settings" + id);
 
         // create the editor
         var editorContainer = document.getElementById("jsoneditor");
-        editorContainer.id = "jsoneditor" + window.counter.toString();
+        editorContainer.id = "jsoneditor" + id;
         var editor = new JSONEditor(editorContainer);
 
-        button.on('click', showModal);
+        button.on('click', showSettings);
 
         save.on('click', function () {
             var newOptions = editor.get();
             //Prevent export from breaking
             delete newOptions.exporting;
             setOptions(newOptions);
-            modal.modal('hide');
+            settings.collapse('hide');
         });
 
-        function showModal() {
-            modal.modal('show');
+        function showSettings() {
+            settings.collapse('toggle');
         }
 
         //Choose a chart type
         var ChartType = useHighStock ? Highcharts.StockChart : Highcharts.Chart;
+
+        //Default highchart colors
+        var colors = ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9',
+            '#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1'];
+
+        series.map(function (serie, index) {
+            if (!serie.color) {
+                serie['color'] = colors[index % 10];
+            }
+
+            return serie;
+        });
 
         //Get all the keys
         var keys = [];
@@ -208,12 +250,6 @@ requirejs([
         } else {
             chartOptions = $.extend(options["chart"], {renderTo: chartContainer.id});
         }
-
-        //Default highchart colors
-        var colors = {};
-        colors.available = ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9',
-            '#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1'];
-        colors.used = [];
 
         //Initial rendered series
         var renderedSeries = [];
@@ -260,22 +296,22 @@ requirejs([
         function addSeries(key) {
             var index = findSeries(series, key);
             var newSeries = series[index];
-            renderedSeries.push($.extend(newSeries, {color: colors.available[0]}));
-            colors.used.push(colors.available.splice(0, 1)[0]);
+            renderedSeries.push(newSeries)
         }
 
         function deleteSeries(key) {
             var index = findSeries(renderedSeries, key);
-            var deletedColor = renderedSeries.splice(index, 1).color;
-            var colorIndex = colors.used.indexOf(deletedColor);
-            colors.available.push(colors.used.splice(colorIndex, 1)[0]);
+            renderedSeries.splice(index, 1)
         }
 
         console.log('loaded!', Date());
+    }
 
-    });
 });
 
 },{}]},{},[1]);
 </script>
 
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css"/>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
