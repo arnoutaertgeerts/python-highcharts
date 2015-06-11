@@ -6,6 +6,6 @@ from server import run_server
 from IPython.core import getipython
 from IPython.core.display import display, HTML
 
-import options
+from settings import settings
 import data
 import jsonencoder

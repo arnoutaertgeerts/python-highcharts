@@ -4,6 +4,7 @@ from core import MyTemplate, to_json_files, to_series, clean_dir, set_display, s
 from jsonencoder import ChartsJSONEncoder
 from chart import Chart
 from server import address
+from settings import settings
 
 import os
 import json
@@ -14,6 +15,7 @@ TABDEPS = """
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css"/>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 """
+
 
 def line(*args, **kwargs):
     return plot(*args, type='line', **kwargs)
@@ -35,9 +37,7 @@ def stock(*args, **kwargs):
     return plot(*args, stock=True, **kwargs)
 
 
-def plot(
-        series, options=dict(), type='line', name=False,
-        height=400, save=False, stock=False, show='tab', display=True):
+def plot(series, **kwargs):
     """
     Make a highchart plot with all data embedded in the HTML
     :param type: Type of the chart (will overwrite options['chart']['type'] if specified).
@@ -51,8 +51,27 @@ def plot(
         - 'window': Show the chart in a new window of the default browser
         - 'inline': Show the chart inline (only works in IPython notebook)
     :param display: A list containing the keys of the variables you want to show initially in the plot
-    :return:
+    :return: The chart to display
     """
+
+    chart_settings = settings.copy()
+    chart_settings.update(kwargs)
+
+    keys = chart_settings.keys()
+
+    for key in keys:
+        if key not in ['options', 'name', 'display', 'save', 'show', 'height', 'type', 'stock']:
+            raise AttributeError(key + ' is not a valid option!')
+
+    options = chart_settings['options']
+    name = chart_settings['name']
+    display = chart_settings['display']
+    save = chart_settings['save']
+    show = chart_settings['show']
+    height = chart_settings['height']
+    type = chart_settings['type']
+    stock = chart_settings['stock']
+
     try:
         if options['chart']:
             options['chart'].update(dict(type=type))
