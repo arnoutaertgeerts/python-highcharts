@@ -1,5 +1,4 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-
 //Count the number of charts on the page
 if (window.counter == undefined) {
     window.counter = 0;
@@ -13,7 +12,7 @@ requirejs([
     'jsoneditor',
     'highstock',
     'export'
-], function($, selectize, JSONEditor) {
+], function ($, selectize, JSONEditor) {
 
     function guid() {
         function s4() {
@@ -21,6 +20,7 @@ requirejs([
                 .toString(16)
                 .substring(1);
         }
+
         return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
             s4() + '-' + s4() + s4() + s4();
     }
@@ -45,10 +45,16 @@ requirejs([
         var url = '$#url'
         var settingsFile = 'settings';
         var settingsFile = '$#settingsFile'
+        var scale = options.scale;
 
         //Create different containers for the charts
         var chartContainer = document.getElementById("chart-container");
         chartContainer.id = "chart-container" + id;
+        chartContainer.style.height = options.height.toString() + 'px';
+
+        if (options.width != 'auto') {
+            chartContainer.style.width = options.width.toString() + 'px';
+        }
 
         var selector = $("#variable-selector");
         selector.attr('id', "variable-selector" + id);
@@ -79,9 +85,7 @@ requirejs([
         optionsButton.on('click', saveOptions);
 
         function applyOptions() {
-             var newOptions = editor.get();
-            //Prevent export from breaking
-            delete newOptions.exporting;
+            var newOptions = editor.get();
             setOptions(newOptions);
             settings.collapse('hide');
         }
@@ -184,7 +188,18 @@ requirejs([
         }
 
         function setOptions(options) {
+            //Prevent export from breaking
+            delete options.exporting;
+            options['exporting'] = {scale: options.scale};
+
+            chartContainer.style.height = options.height.toString() + 'px';
+
+            if (options.width != 'auto') {
+                chartContainer.style.width = options.width.toString() + 'px';
+            }
+
             newChart(options, renderedSeries);
+
         }
 
         function findSeries(series, key) {

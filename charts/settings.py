@@ -2,36 +2,18 @@ __author__ = 'Arnout Aertgeerts'
 import json
 
 
-default = dict(
-    options=dict(),
-    type='line',
-    name=False,
-    height=400,
-    save=False,
-    stock=False,
-    show='tab',
-    display=True)
-
-
-class Settings(dict):
+class DefaultDict(dict):
     def __init__(self, **kwargs):
+        self.default = kwargs
 
-        super(Settings, self).__init__(
-            options=dict(),
-            type='line',
-            name=False,
-            stock=False,
-            show='tab',
-            save=False,
-            height=400,
-            display=True
-        )
+        super(DefaultDict, self).__init__(kwargs)
 
     def reset(self):
-        self.update(default)
+        self.update(self.default)
 
 
-settings = Settings()
+default_settings = DefaultDict(type='line', name=False, height=400, save=False, stock=False, show='tab', display=True)
+default_options = DefaultDict(width='auto', height=400, scale=2, type='line')
 
 
 def load_options(path):

@@ -11,6 +11,8 @@ gulp.task('replace-pre', ['browserify'], function() {
         .pipe(replace('//replace-url', "var url = '$#url'"))
         .pipe(replace('//replace-highstock', "var useHighStock = '$#highstock'"))
         .pipe(replace('//replace-path', "var path = '$#path'"))
+        .pipe(replace('//replace-height', "var height = '$#height'"))
+        .pipe(replace('//replace-width', "var width = '$#width'"))
         .pipe(replace('//replace-settings', "var settingsFile = '$#settingsFile'"))
         .pipe(gulp.dest(config.dest))
         .pipe(size());
@@ -22,6 +24,8 @@ gulp.task('replace-post', ['inline'], function() {
         .pipe(replace("'$#options'", "$#options"))
         .pipe(replace("'$#highstock'", "$#highstock"))
         .pipe(replace("'$#save'", "$#save"))
+        .pipe(replace("'$#height'", "$#height"))
+        .pipe(replace("'$#width'", "$#width"))
         .pipe(replace("'$#url'", "$#url"))
         .pipe(replace("'$#path'", "$#path"))
         .pipe(replace("'$#settingsFile'", "$#settingsFile"))

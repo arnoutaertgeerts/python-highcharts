@@ -1,4 +1,3 @@
-
 //Count the number of charts on the page
 if (window.counter == undefined) {
     window.counter = 0;
@@ -12,7 +11,7 @@ requirejs([
     'jsoneditor',
     'highstock',
     'export'
-], function($, selectize, JSONEditor) {
+], function ($, selectize, JSONEditor) {
 
     function guid() {
         function s4() {
@@ -20,6 +19,7 @@ requirejs([
                 .toString(16)
                 .substring(1);
         }
+
         return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
             s4() + '-' + s4() + s4() + s4();
     }
@@ -44,10 +44,16 @@ requirejs([
         //replace-url
         var settingsFile = 'settings';
         //replace-settings
+        var scale = options.scale;
 
         //Create different containers for the charts
         var chartContainer = document.getElementById("chart-container");
         chartContainer.id = "chart-container" + id;
+        chartContainer.style.height = options.height.toString() + 'px';
+
+        if (options.width != 'auto') {
+            chartContainer.style.width = options.width.toString() + 'px';
+        }
 
         var selector = $("#variable-selector");
         selector.attr('id', "variable-selector" + id);
@@ -78,9 +84,7 @@ requirejs([
         optionsButton.on('click', saveOptions);
 
         function applyOptions() {
-             var newOptions = editor.get();
-            //Prevent export from breaking
-            delete newOptions.exporting;
+            var newOptions = editor.get();
             setOptions(newOptions);
             settings.collapse('hide');
         }
@@ -183,7 +187,18 @@ requirejs([
         }
 
         function setOptions(options) {
+            //Prevent export from breaking
+            delete options.exporting;
+            options['exporting'] = {scale: options.scale};
+
+            chartContainer.style.height = options.height.toString() + 'px';
+
+            if (options.width != 'auto') {
+                chartContainer.style.width = options.width.toString() + 'px';
+            }
+
             newChart(options, renderedSeries);
+
         }
 
         function findSeries(series, key) {

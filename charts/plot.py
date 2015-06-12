@@ -4,7 +4,7 @@ from core import MyTemplate, to_json_files, to_series, clean_dir, set_display, s
 from jsonencoder import ChartsJSONEncoder
 from chart import Chart
 from server import address
-from settings import settings, load_options
+from settings import default_settings, load_options, default_options
 
 import os
 import json
@@ -37,7 +37,7 @@ def stock(*args, **kwargs):
     return plot(*args, stock=True, **kwargs)
 
 
-def plot(series, **kwargs):
+def plot(series, options=dict(), **kwargs):
     """
     Make a highchart plot with all data embedded in the HTML
     :param type: Type of the chart (will overwrite options['chart']['type'] if specified).
@@ -54,27 +54,29 @@ def plot(series, **kwargs):
     :return: The chart to display
     """
 
-    chart_settings = settings.copy()
+    # Check if options is a json file
+    if isinstance(options, str):
+        options = load_options(options + '.json')
+
+    chart_settings = default_settings.copy()
+    chart_options = default_options.copy()
+
     chart_settings.update(kwargs)
+    chart_options.update(options)
 
     keys = chart_settings.keys()
 
     for key in keys:
-        if key not in ['options', 'name', 'display', 'save', 'show', 'height', 'type', 'stock']:
+        if key not in ['options', 'name', 'display', 'save', 'show', 'height', 'type', 'stock', 'width']:
             raise AttributeError(key + ' is not a valid option!')
 
-    options = chart_settings['options']
+    options = chart_options
     name = chart_settings['name']
     display = chart_settings['display']
     save = chart_settings['save']
     show = chart_settings['show']
-    height = chart_settings['height']
     type = chart_settings['type']
     stock = chart_settings['stock']
-
-    # Check if options is a json file
-    if isinstance(options, str):
-        options = load_options(options + '.json')
 
     try:
         if options['chart']:
@@ -115,7 +117,6 @@ def plot(series, **kwargs):
             series=json.dumps(series, cls=ChartsJSONEncoder),
             options=json.dumps(options),
             highstock=json.dumps(stock),
-            height=str(height) + "px",
             url=json.dumps(address),
             save=json.dumps(saveSVG),
             settingsFile=json.dumps(settings_file)
