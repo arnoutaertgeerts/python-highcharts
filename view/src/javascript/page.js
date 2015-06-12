@@ -40,8 +40,10 @@ requirejs([
         //replace-highstock
         var save = 'app/chart.svg';
         //replace-save
-        var url = 'http://127.0.0.1:37759';
+        var url = 'http://127.0.0.1:65079';
         //replace-url
+        var settingsFile = 'settings';
+        //replace-settings
 
         //Create different containers for the charts
         var chartContainer = document.getElementById("chart-container");
@@ -59,20 +61,51 @@ requirejs([
         var saveButton = $("#save-settings");
         saveButton.attr('id', "save-settings" + id);
 
+        var optionsInput = $("#options-input");
+        optionsInput.attr('id', "options-input" + id);
+        optionsInput.val(settingsFile);
+
+        var optionsButton = $("#options-button");
+        optionsButton.attr('id', "options-button" + id);
+
         // create the editor
         var editorContainer = document.getElementById("jsoneditor");
         editorContainer.id = "jsoneditor" + id;
         var editor = new JSONEditor(editorContainer);
 
         button.on('click', showSettings);
+        saveButton.on('click', applyOptions);
+        optionsButton.on('click', saveOptions);
 
-        saveButton.on('click', function () {
-            var newOptions = editor.get();
+        function applyOptions() {
+             var newOptions = editor.get();
             //Prevent export from breaking
             delete newOptions.exporting;
             setOptions(newOptions);
             settings.collapse('hide');
-        });
+        }
+
+        function saveOptions(event) {
+            event.preventDefault();
+
+            applyOptions();
+
+            var options = chart.options;
+            delete options.exporting;
+
+            var name = optionsInput.val() ? optionsInput.val() + '.json' : 'settings.json';
+
+            options['settingsFile'] = name;
+
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: JSON.stringify({
+                    options: options,
+                    name: name
+                })
+            });
+        }
 
         function showSettings() {
             settings.collapse('toggle');

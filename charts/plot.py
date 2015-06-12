@@ -4,7 +4,7 @@ from core import MyTemplate, to_json_files, to_series, clean_dir, set_display, s
 from jsonencoder import ChartsJSONEncoder
 from chart import Chart
 from server import address
-from settings import settings
+from settings import settings, load_options
 
 import os
 import json
@@ -72,6 +72,10 @@ def plot(series, **kwargs):
     type = chart_settings['type']
     stock = chart_settings['stock']
 
+    # Check if options is a json file
+    if isinstance(options, str):
+        options = load_options(options + '.json')
+
     try:
         if options['chart']:
             options['chart'].update(dict(type=type))
@@ -100,6 +104,11 @@ def plot(series, **kwargs):
     if extension == '.html':
         saveHTML = save
 
+    if 'settingsFile' in options:
+        settings_file = options['settingsFile'][:-5]
+    else:
+        settings_file = 'settings'
+
     with open(os.path.join(package_directory, "index.html"), "r") as html:
         html = MyTemplate(html.read()).substitute(
             path=package_directory,
@@ -108,7 +117,8 @@ def plot(series, **kwargs):
             highstock=json.dumps(stock),
             height=str(height) + "px",
             url=json.dumps(address),
-            save=json.dumps(saveSVG)
+            save=json.dumps(saveSVG),
+            settingsFile=json.dumps(settings_file)
         )
 
     if saveHTML:

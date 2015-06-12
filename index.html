@@ -32,9 +32,24 @@ body.modal-open{overflow:hidden}
                     <div class="row">
                         <div id="jsoneditor" class="col-md-12" style="height: 350px"></div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <button type="button" class="btn btn-primary" id="save-settings" style="margin-top: 10px">Save changes</button>
+                    <div class="row" style="margin-top: 10px">
+                        <div class="col-sm-4">
+                            <button type="button" class="btn btn-primary" id="save-settings">
+                                Apply changes
+                            </button>
+                        </div>
+                        <div class="col-sm-8 text-right ">
+                            <form class="form-inline">
+                                <div class="form-group">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="options-input"
+                                               placeholder="settings" style="text-align: right">
+                                        <div class="input-group-addon"><strong>.json</strong></div>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary" id="options-button">Save</button>
+                            </form>
+
                         </div>
                     </div>
                 </div>
@@ -77,6 +92,41 @@ if (!Array.prototype.findIndex) {
             }
         }
         return -1;
+    };
+}
+
+if (!Array.prototype.filter) {
+    Array.prototype.filter = function(fun/*, thisArg*/) {
+        'use strict';
+
+        if (this === void 0 || this === null) {
+            throw new TypeError();
+        }
+
+        var t = Object(this);
+        var len = t.length >>> 0;
+        if (typeof fun !== 'function') {
+            throw new TypeError();
+        }
+
+        var res = [];
+        var thisArg = arguments.length >= 2 ? arguments[1] : void 0;
+        for (var i = 0; i < len; i++) {
+            if (i in t) {
+                var val = t[i];
+
+                // NOTE: Technically this should Object.defineProperty at
+                //       the next index, as push can be affected by
+                //       properties on Object.prototype and Array.prototype.
+                //       But that method's new, and collisions should be
+                //       rare, so use the more-compatible alternative.
+                if (fun.call(thisArg, val, i, t)) {
+                    res.push(val);
+                }
+            }
+        }
+
+        return res;
     };
 }
 
@@ -175,15 +225,17 @@ requirejs([
             {data: [9, 4, 2, 1], name: "temperature 2", display: true},
             {data: [0, 3, 5, 6], name: "temperature 3", display: false}
         ];
-        var series = [{"data": [1, 2, 5, 9, 6, 3, 4, 8], "name": "List data", "display": true}]
+        var series = [{"data": [[1, 8], [2, 7], [3, 4], [4, 3], [5, 9], [6, 0], [7, 10], [8, 5]], "name": "Second list data", "display": true}]
         var options = {};
         var options = {"chart": {"type": "line"}}
         var useHighStock = false;
         var useHighStock = false
         var save = 'app/chart.svg';
-        var save = "temp.svg"
-        var url = 'http://127.0.0.1:37759';
-        var url = "http://127.0.0.1:45179/"
+        var save = false
+        var url = 'http://127.0.0.1:65079';
+        var url = "http://127.0.0.1:65405/"
+        var settingsFile = 'settings';
+        var settingsFile = "settings"
 
         //Create different containers for the charts
         var chartContainer = document.getElementById("chart-container");
@@ -201,20 +253,51 @@ requirejs([
         var saveButton = $("#save-settings");
         saveButton.attr('id', "save-settings" + id);
 
+        var optionsInput = $("#options-input");
+        optionsInput.attr('id', "options-input" + id);
+        optionsInput.val(settingsFile);
+
+        var optionsButton = $("#options-button");
+        optionsButton.attr('id', "options-button" + id);
+
         // create the editor
         var editorContainer = document.getElementById("jsoneditor");
         editorContainer.id = "jsoneditor" + id;
         var editor = new JSONEditor(editorContainer);
 
         button.on('click', showSettings);
+        saveButton.on('click', applyOptions);
+        optionsButton.on('click', saveOptions);
 
-        saveButton.on('click', function () {
-            var newOptions = editor.get();
+        function applyOptions() {
+             var newOptions = editor.get();
             //Prevent export from breaking
             delete newOptions.exporting;
             setOptions(newOptions);
             settings.collapse('hide');
-        });
+        }
+
+        function saveOptions(event) {
+            event.preventDefault();
+
+            applyOptions();
+
+            var options = chart.options;
+            delete options.exporting;
+
+            var name = optionsInput.val() ? optionsInput.val() + '.json' : 'settings.json';
+
+            options['settingsFile'] = name;
+
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: JSON.stringify({
+                    options: options,
+                    name: name
+                })
+            });
+        }
 
         function showSettings() {
             settings.collapse('toggle');

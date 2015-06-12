@@ -1,4 +1,6 @@
 __author__ = 'Arnout Aertgeerts'
+import json
+
 
 default = dict(
     options=dict(),
@@ -30,3 +32,12 @@ class Settings(dict):
 
 
 settings = Settings()
+
+
+def load_options(path):
+    try:
+        with open(path, 'r') as json_file:
+            return json.loads(json_file.read())
+    except IOError:
+        print 'No options file found. Did you spell the name correctly?'
+        return dict()

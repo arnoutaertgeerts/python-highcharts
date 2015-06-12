@@ -32,9 +32,24 @@ body.modal-open{overflow:hidden}
                     <div class="row">
                         <div id="jsoneditor" class="col-md-12" style="height: 350px"></div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <button type="button" class="btn btn-primary" id="save-settings" style="margin-top: 10px">Save changes</button>
+                    <div class="row" style="margin-top: 10px">
+                        <div class="col-sm-4">
+                            <button type="button" class="btn btn-primary" id="save-settings">
+                                Apply changes
+                            </button>
+                        </div>
+                        <div class="col-sm-8 text-right ">
+                            <form class="form-inline">
+                                <div class="form-group">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="options-input"
+                                               placeholder="settings" style="text-align: right">
+                                        <div class="input-group-addon"><strong>.json</strong></div>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary" id="options-button">Save</button>
+                            </form>
+
                         </div>
                     </div>
                 </div>
@@ -217,8 +232,10 @@ requirejs([
         var useHighStock = $#highstock
         var save = 'app/chart.svg';
         var save = $#save
-        var url = 'http://127.0.0.1:37759';
+        var url = 'http://127.0.0.1:65079';
         var url = $#url
+        var settingsFile = 'settings';
+        var settingsFile = $#settingsFile
 
         //Create different containers for the charts
         var chartContainer = document.getElementById("chart-container");
@@ -236,20 +253,51 @@ requirejs([
         var saveButton = $("#save-settings");
         saveButton.attr('id', "save-settings" + id);
 
+        var optionsInput = $("#options-input");
+        optionsInput.attr('id', "options-input" + id);
+        optionsInput.val(settingsFile);
+
+        var optionsButton = $("#options-button");
+        optionsButton.attr('id', "options-button" + id);
+
         // create the editor
         var editorContainer = document.getElementById("jsoneditor");
         editorContainer.id = "jsoneditor" + id;
         var editor = new JSONEditor(editorContainer);
 
         button.on('click', showSettings);
+        saveButton.on('click', applyOptions);
+        optionsButton.on('click', saveOptions);
 
-        saveButton.on('click', function () {
-            var newOptions = editor.get();
+        function applyOptions() {
+             var newOptions = editor.get();
             //Prevent export from breaking
             delete newOptions.exporting;
             setOptions(newOptions);
             settings.collapse('hide');
-        });
+        }
+
+        function saveOptions(event) {
+            event.preventDefault();
+
+            applyOptions();
+
+            var options = chart.options;
+            delete options.exporting;
+
+            var name = optionsInput.val() ? optionsInput.val() + '.json' : 'settings.json';
+
+            options['settingsFile'] = name;
+
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: JSON.stringify({
+                    options: options,
+                    name: name
+                })
+            });
+        }
 
         function showSettings() {
             settings.collapse('toggle');

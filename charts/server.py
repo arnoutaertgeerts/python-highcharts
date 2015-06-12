@@ -15,8 +15,12 @@ class ChartRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         content_len = int(self.headers.getheader('content-length', 0))
         body = json.loads(self.rfile.read(content_len))
 
-        with open(body['name'], 'w') as chart_file:
-            chart_file.write(body['svg'])
+        if 'options' in body:
+            with open(body['name'], 'w') as json_file:
+                json_file.write(json.dumps(body['options']))
+        else:
+            with open(body['name'], 'w') as chart_file:
+                chart_file.write(body['svg'])
 
         SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
 
