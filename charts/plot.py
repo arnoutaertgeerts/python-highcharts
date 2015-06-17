@@ -160,7 +160,7 @@ def plotasync(
     if purge:
         clean_dir(save)
 
-    if series:
+    if series is not None:
         # Convert to a legitimate series object
         series = to_series(series)
         series = set_display(series, display)

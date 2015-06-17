@@ -137,13 +137,13 @@ requirejs([
                 keys = data;
 
                 var showNewKeys = newKeys.map(function(obj) {
-                    return obj.display == true
+                    if (obj.display == true) return obj;
                 });
 
                 selector.addOption(keys);
 
-                $.each(showNewKeys, function(obj, index) {
-                    selector.addItem(obj)
+                $.each(showNewKeys, function(index, obj) {
+                    selector.addItem(obj.value)
                 })
             })
         }
