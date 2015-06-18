@@ -84,6 +84,12 @@ def plot(series, options=dict(), **kwargs):
     except KeyError:
         options['chart'] = dict(type=type)
 
+    try:
+        if not options['height']:
+            options['chart'].update(dict(type=type))
+    except KeyError:
+        options['chart'] = dict(type=type)
+
     # Convert to a legitimate series object
     series = to_series(series, name)
 
@@ -155,6 +161,9 @@ def plotasync(
             options['chart'] = dict(type=type)
     except KeyError:
         options['chart'] = dict(type=type)
+
+    if 'height' not in options:
+        options['height'] = 400
 
     # Clean the directory
     if purge:
