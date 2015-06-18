@@ -43,6 +43,11 @@ def clean_dir(path):
     os.makedirs(path)
 
 
+def make_dir(path):
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+
 def to_json_files(series, path):
     try:
         with open(os.path.join(path, 'keys.json'), "r") as keys_file:
@@ -50,16 +55,26 @@ def to_json_files(series, path):
     except IOError:
         keys = []
 
+    for k in keys:
+        k["display"] = False
+
     for s in series:
         if s["name"] not in map(lambda x: x["name"], keys):
             keys.append(dict(name=s["name"], display=s["display"], value=s["name"], text=s["name"]))
             with open(os.path.join(path, s["name"] + ".json"), "w") as json_file:
                 json_file.write(json.dumps(s, cls=ChartsJSONEncoder))
         else:
-            print "Careful: '%s' was already present as key and is not added to the chart!" % s["name"]
+            i = find(keys, "name", s["name"])
+            keys[i] = dict(name=s["name"], display=s["display"], value=s["name"], text=s["name"])
 
     with open(os.path.join(path, 'keys.json'), "w") as keys_file:
         keys_file.write(json.dumps(keys))
+
+
+def find(col, key, value):
+    for i, c in enumerate(col):
+        if c[key] == value:
+            return i
 
 
 def set_display(series, display):
@@ -91,23 +106,23 @@ def df_to_series(df):
     """
 
     import pandas as pd
-    try:
-        df.index = df.index.tz_localize(None)
-        index = [int(x/1e6) for x in df.index.asi8]
-    except Exception as e:
-        index = df.index
+    import numpy as np
 
     df = df.where((pd.notnull(df)), None)
+
+    if isinstance(df.index, pd.DatetimeIndex):
+        index = df.index.asi8 / (1e6)
+    else:
+        index = df.index
+
     series = []
     for col in df:
-        data = []
-        for i, x in enumerate(index):
-            try:
-                data.append([int(x), df[col].iloc[i]])
-            except ValueError:
-                data.append([x, df[col].iloc[i]])
-        my_dict = {'data': data,'name': col}
-        series.append(my_dict)
+        series.append(
+            dict(name=col,
+                 data=np.array([index, df[col].values]).T,
+                 display=False)
+        )
+
     return series
 
 
