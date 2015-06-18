@@ -1,6 +1,6 @@
 __author__ = 'Arnout Aertgeerts'
 
-from core import MyTemplate, to_json_files, to_series, clean_dir, set_display, show_plot
+from core import MyTemplate, to_json_files, to_series, clean_dir, set_display, show_plot, make_dir
 from jsonencoder import ChartsJSONEncoder
 from chart import Chart
 from server import address
@@ -159,6 +159,8 @@ def plotasync(
     # Clean the directory
     if purge:
         clean_dir(save)
+    else:
+        make_dir(save)
 
     if series is not None:
         # Convert to a legitimate series object
