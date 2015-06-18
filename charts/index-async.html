@@ -216,6 +216,7 @@ requirejs([
         //Create different containers for the charts
         var chartContainer = document.getElementById("chart-container");
         chartContainer.id = "chart-container" + id;
+        chartContainer.style.height = options.height.toString() + 'px';
 
         var selectorContainer = $("#variable-selector");
         selectorContainer.attr('id', "variable-selector" + id);
@@ -300,7 +301,7 @@ requirejs([
 
         var selector = selectorContainer[0].selectize;
 
-            //Check for new keys
+        //Check for new keys
         function update() {
             $.get(path + '/keys.json').done(function (data) {
                 //Get the new keys
