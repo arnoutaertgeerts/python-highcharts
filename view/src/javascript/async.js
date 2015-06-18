@@ -35,6 +35,7 @@ requirejs([
         //Create different containers for the charts
         var chartContainer = document.getElementById("chart-container");
         chartContainer.id = "chart-container" + id;
+        chartContainer.style.height = options.height.toString() + 'px';
 
         var selectorContainer = $("#variable-selector");
         selectorContainer.attr('id', "variable-selector" + id);
