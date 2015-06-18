@@ -119,7 +119,7 @@ requirejs([
 
         var selector = selectorContainer[0].selectize;
 
-            //Check for new keys
+        //Check for new keys
         function update() {
             $.get(path + '/keys.json').done(function (data) {
                 //Get the new keys
@@ -135,8 +135,8 @@ requirejs([
                 //Set the keys equal to all keys and update the selector
                 keys = data;
 
-                var showNewKeys = newKeys.map(function(obj) {
-                    if (obj.display == true) return obj;
+                var showNewKeys = newKeys.filter(function(obj) {
+                    return obj.display == true;
                 });
 
                 selector.addOption(keys);

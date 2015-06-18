@@ -136,8 +136,8 @@ requirejs([
                 //Set the keys equal to all keys and update the selector
                 keys = data;
 
-                var showNewKeys = newKeys.map(function(obj) {
-                    if (obj.display == true) return obj;
+                var showNewKeys = newKeys.filter(function(obj) {
+                    return obj.display == true;
                 });
 
                 selector.addOption(keys);
