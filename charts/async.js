@@ -50,6 +50,13 @@ requirejs([
         var saveButton = $("#save-settings");
         saveButton.attr('id', "save-settings" + id);
 
+        var optionsInput = $("#options-input");
+        optionsInput.attr('id', "options-input" + id);
+        optionsInput.val(settingsFile);
+
+        var optionsButton = $("#options-button");
+        optionsButton.attr('id', "options-button" + id);
+
         var updateButton = $("#update-button");
         updateButton.attr('id', "update-button" + id);
 
@@ -61,16 +68,38 @@ requirejs([
         editorContainer.id = "jsoneditor" + id;
         var editor = new JSONEditor(editorContainer);
 
-        button.on('click', showSettings);
         updateButton.on('click', update);
+        button.on('click', showSettings);
+        saveButton.on('click', applyOptions);
+        optionsButton.on('click', saveOptions);
 
-        saveButton.on('click', function () {
+        function applyOptions() {
             var newOptions = editor.get();
-            //Prevent export from breaking
-            delete newOptions.exporting;
             setOptions(newOptions);
             settings.collapse('hide');
-        });
+        }
+
+        function saveOptions(event) {
+            event.preventDefault();
+
+            applyOptions();
+
+            var options = chart.options;
+            delete options.exporting;
+
+            var name = optionsInput.val() ? optionsInput.val() + '.json' : 'settings.json';
+
+            options['settingsFile'] = name;
+
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: JSON.stringify({
+                    options: options,
+                    name: name
+                })
+            });
+        }
 
         function showSettings() {
             settings.collapse('toggle');
@@ -150,7 +179,18 @@ requirejs([
         }
 
         function setOptions(options) {
+            //Prevent export from breaking
+            delete options.exporting;
+            options['exporting'] = {scale: options.scale};
+
+            chartContainer.style.height = options.height.toString() + 'px';
+
+            if (options.width != 'auto') {
+                chartContainer.style.width = options.width.toString() + 'px';
+            }
+
             newChart(options, renderedSeries);
+
         }
 
         function findSeries(series, key) {

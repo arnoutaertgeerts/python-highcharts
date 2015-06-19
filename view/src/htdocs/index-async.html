@@ -24,9 +24,24 @@
                     <div class="row">
                         <div id="jsoneditor" class="col-md-12" style="height: 350px"></div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <button type="button" class="btn btn-primary" id="save-settings" style="margin-top: 10px">Save changes</button>
+                    <div class="row" style="margin-top: 10px">
+                        <div class="col-sm-4">
+                            <button type="button" class="btn btn-primary" id="save-settings">
+                                Apply changes
+                            </button>
+                        </div>
+                        <div class="col-sm-8 text-right ">
+                            <form class="form-inline">
+                                <div class="form-group">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="options-input"
+                                               placeholder="settings" style="text-align: right">
+                                        <div class="input-group-addon"><strong>.json</strong></div>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary" id="options-button">Save</button>
+                            </form>
+
                         </div>
                     </div>
                 </div>
