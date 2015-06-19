@@ -31,6 +31,8 @@ requirejs([
         //replace-url
         var path = 'small';
         //replace-path
+        var settingsFile = 'settings';
+        //replace-settings
 
         //Create different containers for the charts
         var chartContainer = document.getElementById("chart-container");
