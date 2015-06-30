@@ -159,9 +159,11 @@ def to_series(series, name=False):
     except ImportError:
         pass
 
-    # DataFrame?:
+    # pandas DataFrame or series?
     import pandas as pd
     if isinstance(series, pd.DataFrame):
         return df_to_series(series)
+    if isinstance(series, pd.Series):
+        return df_to_series(pd.DataFrame(series))
 
     raise ValueError('Your data is not in the right format!')
