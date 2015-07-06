@@ -36,6 +36,9 @@ def show_plot(html, saveHTML, show, async=False):
         else:
             webbrowser.open_new('file://' + os.path.realpath(saveHTML))
 
+    elif show == 'none':
+        pass
+
 
 def clean_dir(path):
     if os.path.exists(path):

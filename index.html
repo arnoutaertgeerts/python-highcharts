@@ -225,15 +225,15 @@ requirejs([
             {data: [9, 4, 2, 1], name: "temperature 2", display: true},
             {data: [0, 3, 5, 6], name: "temperature 3", display: false}
         ];
-        var series = [{"data": [1, 2, 5, 9, 6, 3, 4, 8], "name": "List data", "display": true}]
+        var series = [{"data": [1, 2, 3, 5], "name": false, "display": true}]
         var options = {};
-        var options = {"width": "auto", "scale": 2, "title": {"text": "TEST"}, "type": "line", "chart": {"type": "line"}, "height": 500}
+        var options = {"width": "auto", "scale": 2, "type": "line", "chart": {"type": "line"}, "height": 400}
         var useHighStock = false;
         var useHighStock = false
         var save = 'app/chart.svg';
-        var save = "temp.svg"
+        var save = false
         var url = 'http://127.0.0.1:65079';
-        var url = "http://127.0.0.1:51024/"
+        var url = "http://127.0.0.1:60276/"
         var settingsFile = 'settings';
         var settingsFile = "settings"
         var scale = options.scale;
@@ -381,7 +381,7 @@ requirejs([
         function setOptions(options) {
             //Prevent export from breaking
             delete options.exporting;
-            options['exporting'] = {scale: scale};
+            options['exporting'] = {scale: options.scale};
 
             chartContainer.style.height = options.height.toString() + 'px';
 
