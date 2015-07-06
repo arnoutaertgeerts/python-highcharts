@@ -26,7 +26,6 @@ series = [
     msft,
     ohlc
 ]
-options = charts.options.default()
 ```
 
 And finally plot the chart! Use `show='inline'` if you are in an IPython notebook and `show='tab'` otherwise.
