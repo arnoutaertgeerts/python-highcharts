@@ -11,7 +11,8 @@ requirejs([
     'selectize',
     'jsoneditor',
     'highstock',
-    'export'
+    'export',
+    'more'
 ], function ($, selectize, JSONEditor) {
 
     function guid() {

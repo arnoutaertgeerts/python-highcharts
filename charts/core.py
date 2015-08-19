@@ -173,3 +173,15 @@ def to_series(series, name=False):
         pass
 
     raise ValueError('Your data is not in the right format!')
+
+def remove_function_quotes(options):
+    i = options.find('function')
+
+    if options[i-1] == '"':
+        options = options[:i-1] + options[i:]
+
+    i = options.find('"', i)
+
+    options = options[:i] + options[i+1:]
+
+    return options

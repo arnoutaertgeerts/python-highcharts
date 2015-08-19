@@ -1,6 +1,6 @@
 __author__ = 'Arnout Aertgeerts'
 
-from core import MyTemplate, to_json_files, to_series, clean_dir, set_display, show_plot, make_dir
+from core import MyTemplate, to_json_files, to_series, clean_dir, set_display, show_plot, make_dir, remove_function_quotes
 from jsonencoder import ChartsJSONEncoder
 from chart import Chart
 from server import address
@@ -121,7 +121,7 @@ def plot(series, options=dict(), **kwargs):
         html = MyTemplate(html.read()).substitute(
             path=package_directory,
             series=json.dumps(series, cls=ChartsJSONEncoder),
-            options=json.dumps(options),
+            options=remove_function_quotes(json.dumps(options)),
             highstock=json.dumps(stock),
             url=json.dumps(address),
             save=json.dumps(saveSVG),
