@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='charts',
-    version='0.4.4',
+    version='0.4.5',
     description='Use the highcharts js library in Python',
     url='https://github.com/arnoutaertgeerts/python-highcharts',
     author='Arnout Aertgeerts',
