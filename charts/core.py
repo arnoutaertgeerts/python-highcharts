@@ -8,6 +8,7 @@ import os
 import json
 import shutil
 import webbrowser
+import re
 
 
 class MyTemplate(Template):
@@ -174,14 +175,17 @@ def to_series(series, name=False):
 
     raise ValueError('Your data is not in the right format!')
 
-def remove_function_quotes(options):
-    i = options.find('function')
+def remove_quotes(options):
 
-    if options[i-1] == '"':
-        options = options[:i-1] + options[i:]
+    options = json.dumps(options)
 
-    i = options.find('"', i)
+    ix = [m.start() for m in re.finditer('@#', options)]
 
-    options = options[:i] + options[i+1:]
+    for j, i in enumerate(ix):
+        k = i-3*j
+        if options[k-1] == '"':
+            options = options[:k-1] + options[k+2:]
+        else:
+            options = options[:k] + options[k+3:]
 
     return options

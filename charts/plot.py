@@ -1,6 +1,6 @@
 __author__ = 'Arnout Aertgeerts'
 
-from core import MyTemplate, to_json_files, to_series, clean_dir, set_display, show_plot, make_dir, remove_function_quotes
+from core import MyTemplate, to_json_files, to_series, clean_dir, set_display, show_plot, make_dir, remove_quotes
 from jsonencoder import ChartsJSONEncoder
 from chart import Chart
 from server import address
@@ -8,6 +8,7 @@ from settings import default_settings, load_options, default_options
 
 import os
 import json
+import re
 
 package_directory = os.path.dirname(os.path.abspath(__file__))
 
@@ -42,7 +43,10 @@ def plot(series, options=dict(), **kwargs):
     Make a highchart plot with all data embedded in the HTML
     :param type: Type of the chart (will overwrite options['chart']['type'] if specified).
     :param series: The necessary data, can be a list of dictionaries or a dataframe
-    :param options: Options for the chart
+    :param options: Options for the chart. This can one of the following:
+        - A Dictionary
+        - The path to a json file
+        - A json string
     :param height: Chart height
     :param save: Specify a filename to save the HTML file if wanted.
     :param stock: Set to False to use Highcharts instead of highstock
@@ -54,9 +58,15 @@ def plot(series, options=dict(), **kwargs):
     :return: The chart to display
     """
 
-    # Check if options is a json file
+    # Check if options is a json string or file
     if isinstance(options, str):
-        options = load_options(options + '.json')
+        if '.json' in options:
+            options = load_options(options)
+        else:
+            try:
+                options = json.loads(options)
+            except ValueError:
+                raise ValueError('Your options string is not valid JSON!')
 
     chart_settings = default_settings.copy()
     chart_options = default_options.copy()
@@ -121,7 +131,7 @@ def plot(series, options=dict(), **kwargs):
         html = MyTemplate(html.read()).substitute(
             path=package_directory,
             series=json.dumps(series, cls=ChartsJSONEncoder),
-            options=remove_function_quotes(json.dumps(options)),
+            options=remove_quotes(options),
             highstock=json.dumps(stock),
             url=json.dumps(address),
             save=json.dumps(saveSVG),
