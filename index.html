@@ -231,13 +231,13 @@ requirejs([
         ];
         var series = [{"data": [[1, 2, 3], [2, 3, 4], [3, 4, 5]], "display": true}]
         var options = {};
-        var options = {"scale": 2, "chart": {"type": "arearange"}, "tooltip": {"formatter": function() { return this.point.y; }}, "height": 400, "width": "auto", "type": "line"}
+        var options = {"scale": 2, "chart": {"type": "line"}, "tooltip": {"formatter": function() { return this.series.name + '<br/>' + this.point.y }}, "height": 400, "width": "auto", "type": "line"}
         var useHighStock = false;
         var useHighStock = false
         var save = 'app/chart.svg';
         var save = false
         var url = 'http://127.0.0.1:65079';
-        var url = "http://127.0.0.1:55336/"
+        var url = "http://127.0.0.1:54420/"
         var settingsFile = 'settings';
         var settingsFile = "settings"
         var scale = options.scale;

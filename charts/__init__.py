@@ -1,6 +1,6 @@
 __author__ = 'arnout'
 
-__version__ = '0.4.5'
+__version__ = '0.4.6'
 
 from plot import plot, plotasync, line, area, spline, pie
 from server import run_server

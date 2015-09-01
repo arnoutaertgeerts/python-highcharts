@@ -8,7 +8,6 @@ from settings import default_settings, load_options, default_options
 
 import os
 import json
-import re
 
 package_directory = os.path.dirname(os.path.abspath(__file__))
 
